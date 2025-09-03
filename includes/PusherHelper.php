@@ -12,7 +12,7 @@ class PusherHelper {
     private $useTLS;
     
     public function __construct() {
-        $config = include 'config/pusher.php';
+        $config = include '../config/pusher.php';
         $this->appId = $config['app_id'];
         $this->key = $config['key'];
         $this->secret = $config['secret'];

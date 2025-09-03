@@ -23,7 +23,9 @@ try {
     // Get JSON input
     $input = json_decode(file_get_contents('php://input'), true);
     $rfidId = $input['rfid_id'] ?? '';
+    // $rfidId = $_GET['rfid_id'];
     $gateLocation = $input['gate_location'] ?? 'main_gate';
+    // $gateLocation = $_GET['gate_location'];
     
     if (empty($rfidId)) {
         throw new Exception('RFID ID is required');

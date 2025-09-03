@@ -1,0 +1,13 @@
+[2025-09-03 12:35:47] [security] RFID Access: RFID003 - granted - Context: {"rfid_id":"RFID003","result":"granted","name":"Mike Johnson","gate":"main_gate","ip":"::1"}
+[2025-09-03 12:36:02] [security] RFID Access: RFID004 - granted - Context: {"rfid_id":"RFID004","result":"granted","name":"Sarah Wilson","gate":"main_gate","ip":"::1"}
+[2025-09-03 12:38:30] [security] RFID Access: RFID004 - granted - Context: {"rfid_id":"RFID004","result":"granted","name":"Sarah Wilson","gate":"main_gate","ip":"::1"}
+[2025-09-03 12:38:40] [security] RFID Access: RFID004 - granted - Context: {"rfid_id":"RFID004","result":"granted","name":"Sarah Wilson","gate":"main_gate","ip":"::1"}
+[2025-09-03 12:38:50] [security] RFID Access: RFID003 - denied - Context: {"rfid_id":"RFID003","result":"denied","name":"Mike Johnson","gate":"main_gate","ip":"::1"}
+[2025-09-03 12:38:56] [security] RFID Access: RFID004 - granted - Context: {"rfid_id":"RFID004","result":"granted","name":"Sarah Wilson","gate":"main_gate","ip":"::1"}
+[2025-09-03 12:39:02] [security] RFID Access: RFID004 - granted - Context: {"rfid_id":"RFID004","result":"granted","name":"Sarah Wilson","gate":"main_gate","ip":"::1"}
+[2025-09-03 12:39:08] [security] RFID Access: UNKNOWN - denied - Context: {"rfid_id":"UNKNOWN","result":"denied","name":"Unknown","gate":"main_gate","ip":"::1"}
+[2025-09-03 12:39:27] [security] RFID Access: RFID005 - granted - Context: {"rfid_id":"RFID005","result":"granted","name":"Bob Brown","gate":"main_gate","ip":"::1"}
+[2025-09-03 12:49:08] [security] RFID Access: RFID002 - denied - Context: {"rfid_id":"RFID002","result":"denied","name":"Jane Smith","gate":"main_gate","ip":"::1"}
+[2025-09-03 12:49:21] [security] RFID Access: RFID003 - denied - Context: {"rfid_id":"RFID003","result":"denied","name":"Mike Johnson","gate":"main_gate","ip":"::1"}
+[2025-09-03 12:49:25] [security] RFID Access: RFID001 - granted - Context: {"rfid_id":"RFID001","result":"granted","name":"John Doe","gate":"main_gate","ip":"::1"}
+[2025-09-03 12:57:24] [security] RFID Access: RFID001 - granted - Context: {"rfid_id":"RFID001","result":"granted","name":"John Doe","gate":"main_gate","ip":"::1"}

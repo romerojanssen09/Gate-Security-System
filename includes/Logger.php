@@ -5,7 +5,7 @@
  */
 
 class Logger {
-    private static $logPath = 'logs/';
+    private static $logPath = '../logs/';
     private static $maxFileSize = 10485760; // 10MB
     
     /**

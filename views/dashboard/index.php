@@ -152,7 +152,7 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
                                 <tr>
                                     <td>
                                         <small>
-                                            <?= date('M d, Y H:i:s', strtotime($log['access_timestamp'])) ?>
+                                            <?= date('M d, Y h:i:s', strtotime($log['access_timestamp'])) ?>
                                         </small>
                                     </td>
                                     <td>
