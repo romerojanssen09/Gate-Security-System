@@ -88,7 +88,7 @@ The scanner provides three distinct states with smooth animations:
 ### **Step 1: Clone Repository**
 ```bash
 git clone https://github.com/romerojanssen09/Gate-Security-System.git
-cd rfid-access-control
+cd Gate-Security-System
 ```
 
 ### **Step 2: Install Dependencies**
