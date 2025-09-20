@@ -87,7 +87,7 @@ The scanner provides three distinct states with smooth animations:
 
 ### **Step 1: Clone Repository**
 ```bash
-git clone https://github.com/yourusername/rfid-access-control.git
+git clone https://github.com/romerojanssen09/Gate-Security-System.git
 cd rfid-access-control
 ```
 
@@ -393,7 +393,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you encounter any issues or have questions:
 
-1. Check the [Issues](https://github.com/yourusername/rfid-access-control/issues) page
+1. Check the [Issues](https://github.com/romerojanssen09/rfid-access-control/issues) page
 2. Create a new issue with detailed information
 3. Include steps to reproduce the problem
 4. Provide system information and error logs
