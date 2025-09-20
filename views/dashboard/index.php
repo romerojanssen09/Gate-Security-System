@@ -69,7 +69,7 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
                             <i class="fas fa-check"></i>
                         </div>
                         <div class="ml-3">
-                            <h5 class="mb-0"><?= number_format($stats['granted_count']) ?></h5>
+                            <h5 class="mb-0" id="grantedCount"><?= number_format($stats['granted_count']) ?></h5>
                             <small class="text-muted">Access Granted</small>
                         </div>
                     </div>
@@ -83,7 +83,7 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
                             <i class="fas fa-times"></i>
                         </div>
                         <div class="ml-3">
-                            <h5 class="mb-0"><?= number_format($stats['denied_count']) ?></h5>
+                            <h5 class="mb-0" id="deniedCount"><?= number_format($stats['denied_count']) ?></h5>
                             <small class="text-muted">Access Denied</small>
                         </div>
                     </div>
@@ -97,7 +97,7 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
                             <i class="fas fa-calendar-day"></i>
                         </div>
                         <div class="ml-3">
-                            <h5 class="mb-0"><?= number_format($stats['today_count']) ?></h5>
+                            <h5 class="mb-0" id="todayCount"><?= number_format($stats['today_count']) ?></h5>
                             <small class="text-muted">Today's Access</small>
                         </div>
                     </div>
@@ -111,7 +111,7 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
                             <i class="fas fa-id-card"></i>
                         </div>
                         <div class="ml-3">
-                            <h5 class="mb-0"><?= number_format($cardsStats['active_cards']) ?></h5>
+                            <h5 class="mb-0" id="activeCards"><?= number_format($cardsStats['active_cards']) ?></h5>
                             <small class="text-muted">Active Cards</small>
                         </div>
                     </div>
@@ -126,11 +126,17 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
                     <div class="card-header bg-white border-bottom">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">
-                                <i class="fas fa-history"></i> Recent Access Logs
+                                <i class="fas fa-history"></i> Recent Access Logs (Last 50)
                             </h5>
-                            <button class="btn btn-sm btn-outline-primary" onclick="refreshLogs()">
-                                <i class="fas fa-sync-alt"></i> Refresh
-                            </button>
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary" onclick="refreshLogs()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+
+                                <a href="index.php?page=reports" class="btn btn-sm btn-outline-secondary ml-2">
+                                    <i class="fas fa-chart-bar"></i> View Reports
+                                </a>
+                            </div>
                         </div>
                     </div>
                     
@@ -202,6 +208,15 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
                 </div>
             </div>
         </div>
+        
+        <!-- Navigation to Reports -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <a href="index.php?page=reports" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-chart-bar"></i> View Detailed Reports
+                </a>
+            </div>
+        </div>
     </div>
     </div>
 
@@ -215,13 +230,30 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
             useTLS: true
         });
         
+        // Debug Pusher connection
+        pusher.connection.bind('connected', function() {
+            console.log('✅ Pusher connected successfully');
+        });
+        
+        pusher.connection.bind('error', function(err) {
+            console.error('❌ Pusher connection error:', err);
+        });
+        
         // Subscribe to RFID access channel
         const rfidChannel = pusher.subscribe('rfid-access-channel');
+        
+        rfidChannel.bind('pusher:subscription_succeeded', function() {
+            console.log('✅ Successfully subscribed to rfid-access-channel');
+        });
+        
+        rfidChannel.bind('pusher:subscription_error', function(err) {
+            console.error('❌ Subscription error:', err);
+        });
+        
         rfidChannel.bind('rfid-scanned', function(data) {
-            console.log('RFID Scanned:', data);
+            console.log('🔔 RFID Scanned Event Received:', data);
             addNewLogEntry(data);
             updateStatistics();
-            showNotification(data);
         });
         
         // Subscribe to gate status channel
@@ -233,6 +265,13 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
         
         function addNewLogEntry(data) {
             const tbody = document.querySelector('#logsTableBody');
+            
+            // Check if tbody has any rows with "No access logs found" message
+            const noDataRow = tbody.querySelector('td[colspan="7"]');
+            if (noDataRow) {
+                tbody.innerHTML = ''; // Clear the "no data" message
+            }
+            
             const newRow = document.createElement('tr');
             newRow.className = 'table-success'; // Highlight new entry
             
@@ -262,42 +301,48 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
                 newRow.classList.remove('table-success');
             }, 3000);
             
-            // Remove last row if we have too many
-            if (tbody.children.length > 50) {
+            // Maintain only 50 rows - remove from bottom when exceeding limit
+            while (tbody.children.length > 50) {
                 tbody.removeChild(tbody.lastChild);
             }
         }
         
         function updateStatistics() {
-            // Refresh statistics - in a real app, you'd update specific counters
-            setTimeout(() => {
-                location.reload();
-            }, 2000);
+            fetch('api/get_dashboard_stats.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update statistics with animation
+                        animateCounterUpdate('grantedCount', data.stats.granted_count);
+                        animateCounterUpdate('deniedCount', data.stats.denied_count);
+                        animateCounterUpdate('todayCount', data.stats.today_count);
+                        animateCounterUpdate('activeCards', data.stats.active_cards);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating statistics:', error);
+                });
         }
         
-        function showNotification(data) {
-            const alertClass = data.access_result === 'granted' ? 'alert-success' : 'alert-danger';
-            const icon = data.access_result === 'granted' ? 'check-circle' : 'exclamation-triangle';
+        function animateCounterUpdate(elementId, newValue) {
+            const element = document.getElementById(elementId);
+            const currentValue = parseInt(element.textContent.replace(/,/g, ''));
             
-            const notification = $(`
-                <div class="alert ${alertClass} alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
-                    <i class="fas fa-${icon}"></i>
-                    <strong>${data.access_result.toUpperCase()}</strong><br>
-                    ${data.full_name} (${data.rfid_id})
-                    ${data.denial_reason ? '<br><small>' + data.denial_reason + '</small>' : ''}
-                    <button type="button" class="close" data-dismiss="alert">
-                        <span>&times;</span>
-                    </button>
-                </div>
-            `);
-            
-            $('body').append(notification);
-            
-            // Auto-dismiss after 5 seconds
-            setTimeout(() => {
-                notification.alert('close');
-            }, 5000);
+            if (currentValue !== newValue) {
+                // Add pulse animation
+                element.parentElement.parentElement.parentElement.classList.add('stat-updated');
+                
+                // Update the value with formatting
+                element.textContent = new Intl.NumberFormat().format(newValue);
+                
+                // Remove animation class after animation completes
+                setTimeout(() => {
+                    element.parentElement.parentElement.parentElement.classList.remove('stat-updated');
+                }, 1000);
+            }
         }
+        
+
         
         function showGateStatus(data) {
             const statusBadge = $('#gateStatus');
@@ -320,10 +365,14 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
             }
         }
         
+        // No polling - only Pusher real-time updates
+        
         // Manual refresh function
         function refreshLogs() {
             location.reload();
         }
+        
+
     </script>
 </body>
 </html>

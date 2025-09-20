@@ -762,3 +762,55 @@ body {
         color: var(--text-dark) !important;
     }
 }
+
+/* Real-time update animations */
+.stat-updated {
+    animation: pulse-update 1s ease-in-out;
+}
+
+@keyframes pulse-update {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 2px 15px rgba(58, 67, 76, 0.1);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 6px 25px rgba(40, 167, 69, 0.3);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 2px 15px rgba(58, 67, 76, 0.1);
+    }
+}
+
+/* New row animation for reports */
+.animate-new-row {
+    animation: slide-in-highlight 0.5s ease-out;
+}
+
+@keyframes slide-in-highlight {
+    0% {
+        transform: translateX(-20px);
+        opacity: 0;
+        background-color: rgba(255, 193, 7, 0.8);
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+        background-color: rgba(255, 193, 7, 0.3);
+    }
+}
+
+/* Table row highlight colors */
+.table-warning {
+    background-color: rgba(255, 193, 7, 0.3) !important;
+}
+
+.table-success {
+    background-color: rgba(40, 167, 69, 0.2) !important;
+}
+
+/* Fade out animation for highlights */
+.table tr {
+    transition: background-color 0.3s ease;
+}

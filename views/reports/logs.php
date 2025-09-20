@@ -188,6 +188,7 @@ if (!empty($paginationParams)) {
     <title>Reports - Gate Security System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link href="assets/css/app.css" rel="stylesheet">
 </head>
 <body>
@@ -244,7 +245,7 @@ if (!empty($paginationParams)) {
         <div class="card">
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5><i class="fas fa-list"></i> Access Logs (<?= number_format($totalRecords) ?> records)</h5>
+                    <h5><i class="fas fa-list"></i> Access Logs (<span id="totalRecords"><?= number_format($totalRecords) ?></span> records)</h5>
                     <small class="text-muted">Page <?= $page ?> of <?= $totalPages ?></small>
                 </div>
             </div>
@@ -262,7 +263,7 @@ if (!empty($paginationParams)) {
                                 <th>Gate</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="reportsTableBody">
                             <?php while ($log = mysqli_fetch_assoc($logsResult)): ?>
                             <tr>
                                 <td>
@@ -336,18 +337,173 @@ if (!empty($paginationParams)) {
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     <script>
+        // Initialize Pusher for real-time updates
+        const pusher = new Pusher('5b24b867b55f7decb7a5', {
+            cluster: 'ap1',
+            useTLS: true
+        });
+        
+        // Debug Pusher connection
+        pusher.connection.bind('connected', function() {
+            console.log('✅ Pusher connected successfully (Reports)');
+        });
+        
+        pusher.connection.bind('error', function(err) {
+            console.error('❌ Pusher connection error (Reports):', err);
+        });
+        
+        // Subscribe to RFID access channel for real-time updates
+        const rfidChannel = pusher.subscribe('rfid-access-channel');
+        
+        rfidChannel.bind('pusher:subscription_succeeded', function() {
+            console.log('✅ Successfully subscribed to rfid-access-channel (Reports)');
+        });
+        
+        rfidChannel.bind('pusher:subscription_error', function(err) {
+            console.error('❌ Subscription error (Reports):', err);
+        });
+        
+        rfidChannel.bind('rfid-scanned', function(data) {
+            console.log('🔔 RFID Scanned Event Received (Reports):', data);
+            addNewLogToReports(data);
+        });
+        
+        function addNewLogToReports(data) {
+            const tbody = document.querySelector('#reportsTableBody');
+            
+            // Only add to first page and if no filters are applied
+            const currentPage = <?= $page ?>;
+            const hasFilters = '<?= $startDate . $endDate . $result ?>' !== '';
+            
+            if (currentPage !== 1 || hasFilters) {
+                // Just update the record count for other pages or filtered views
+                updateRecordCount();
+                return;
+            }
+            
+            // Check if tbody has any rows with "No access logs found" message
+            const noDataRow = tbody.querySelector('td[colspan="7"]');
+            if (noDataRow) {
+                tbody.innerHTML = ''; // Clear the "no data" message
+            }
+            
+            const newRow = document.createElement('tr');
+            newRow.className = 'table-warning animate-new-row'; // Highlight ONLY new entry
+            
+            const badgeClass = data.access_result === 'granted' ? 'badge-granted' : 'badge-denied';
+            const icon = data.access_result === 'granted' ? 'check' : 'times';
+            
+            newRow.innerHTML = `
+                <td><small>${new Date(data.timestamp).toLocaleString()}</small></td>
+                <td><code>${data.rfid_id}</code></td>
+                <td>${data.full_name || 'Unknown'}</td>
+                <td>${data.role ? '<span class="badge badge-secondary">' + data.role.charAt(0).toUpperCase() + data.role.slice(1) + '</span>' : '<span class="text-muted">-</span>'}</td>
+                <td>${data.plate_number || '-'}</td>
+                <td>
+                    <span class="badge ${badgeClass}">
+                        <i class="fas fa-${icon}"></i> ${data.access_result.charAt(0).toUpperCase() + data.access_result.slice(1)}
+                    </span>
+                    ${data.denial_reason ? '<br><small class="text-muted">' + data.denial_reason + '</small>' : ''}
+                </td>
+                <td><small>${data.gate_location}</small></td>
+            `;
+            
+            // Insert at the top
+            tbody.insertBefore(newRow, tbody.firstChild);
+            
+            // Remove highlight after 3 seconds (shorter duration)
+            setTimeout(() => {
+                newRow.classList.remove('table-warning', 'animate-new-row');
+            }, 3000);
+            
+            // Remove last row if we exceed the page limit
+            const maxRows = 50;
+            if (tbody.children.length > maxRows) {
+                tbody.removeChild(tbody.lastChild);
+            }
+            
+            // Update record count
+            updateRecordCount();
+        }
+        
+        function updateRecordCount() {
+            // Increment the total records count
+            const recordsElement = document.getElementById('totalRecords');
+            const currentCount = parseInt(recordsElement.textContent.replace(/,/g, ''));
+            recordsElement.textContent = new Intl.NumberFormat().format(currentCount + 1);
+        }
+        
+
+        
+        // No polling - only Pusher real-time updates
+        
         function exportToExcel() {
-            const startDate = document.querySelector('input[name="start_date"]').value;
-            const endDate = document.querySelector('input[name="end_date"]').value;
-            const result = document.querySelector('select[name="result"]').value;
+            // Get today's date in YYYY-MM-DD format
+            const today = new Date().toISOString().split('T')[0];
             
-            let exportUrl = '?page=reports&export=excel';
-            if (startDate) exportUrl += '&start_date=' + startDate;
-            if (endDate) exportUrl += '&end_date=' + endDate;
-            if (result) exportUrl += '&result=' + result;
-            
-            window.location.href = exportUrl;
+            Swal.fire({
+                title: 'Export to Excel',
+                html: `
+                    <div class="form-group text-left">
+                        <label for="export-start-date">Start Date:</label>
+                        <input type="date" id="export-start-date" class="form-control" value="">
+                    </div>
+                    <div class="form-group text-left">
+                        <label for="export-end-date">End Date:</label>
+                        <input type="date" id="export-end-date" class="form-control" value="${today}">
+                    </div>
+                    <small class="text-muted">Leave start date empty to export from beginning. End date defaults to today.</small>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-download"></i> Export',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#28a745',
+                preConfirm: () => {
+                    const startDate = document.getElementById('export-start-date').value;
+                    const endDate = document.getElementById('export-end-date').value;
+                    
+                    // Validate date range
+                    if (startDate && endDate && startDate > endDate) {
+                        Swal.showValidationMessage('Start date cannot be after end date');
+                        return false;
+                    }
+                    
+                    return { startDate, endDate };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { startDate, endDate } = result.value;
+                    
+                    // Get current filter values
+                    const currentResult = document.querySelector('select[name="result"]').value;
+                    
+                    let exportUrl = '?page=reports&export=excel';
+                    if (startDate) exportUrl += '&start_date=' + startDate;
+                    if (endDate) exportUrl += '&end_date=' + endDate;
+                    if (currentResult) exportUrl += '&result=' + currentResult;
+                    
+                    // Show loading
+                    Swal.fire({
+                        title: 'Exporting...',
+                        text: 'Please wait while we prepare your Excel file',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    // Trigger download
+                    window.location.href = exportUrl;
+                    
+                    // Close loading after a short delay
+                    setTimeout(() => {
+                        Swal.close();
+                    }, 2000);
+                }
+            });
         }
     </script>
 </body>

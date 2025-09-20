@@ -43,19 +43,53 @@
         }
 
         .rfid-display {
-            background: var(--text-dark);
-            color: var(--success-green);
-            font-family: 'Courier New', monospace;
-            font-size: 24px;
-            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            border-radius: 20px;
             text-align: center;
-            border-radius: 12px;
-            margin: 25px 0;
-            min-height: 100px;
+            font-size: 24px;
+            font-weight: 600;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin: 40px 0;
+            min-height: 200px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            border: 2px solid rgba(197, 187, 183, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .status-icon-large {
+            font-size: 48px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .status-text {
+            font-size: 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .checking {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .checking .status-icon-large {
+            animation: spin 2s linear infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .btn-scan {
@@ -171,7 +205,12 @@
             </div>
 
             <div class="rfid-display" id="rfidDisplay">
-                Waiting for RFID card...
+                <div id="statusIcon" class="status-icon-large">
+                    <i class="fas fa-id-card"></i>
+                </div>
+                <div id="statusText" class="status-text">
+                    Waiting for RFID card...
+                </div>
             </div>
 
             <div class="row mb-3">
@@ -237,63 +276,98 @@
 
         function scanRFID(rfidId) {
             updateStatus('scanning', 'Scanning...');
-            document.getElementById('rfidDisplay').textContent = 'Scanning: ' + rfidId;
+            
+            // Show checking state
+            showCheckingState();
 
-            // Simulate scanning delay
+            // Send RFID data to API
+            fetch('api/rfid_scan.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    rfid_id: rfidId,
+                    gate_location: 'main_gate'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Scan result:', data);
+                displayResult(data);
+            })
+            .catch(error => {
+                console.error('Scan error:', error);
+                showErrorState();
+            });
+        }
+        
+        function showCheckingState() {
+            const display = document.getElementById('rfidDisplay');
+            const icon = document.getElementById('statusIcon');
+            const text = document.getElementById('statusText');
+            
+            display.classList.add('checking');
+            icon.innerHTML = '<i class="fas fa-spinner"></i>';
+            text.textContent = 'Checking card data...';
+        }
+        
+        function showWaitingState() {
+            const display = document.getElementById('rfidDisplay');
+            const icon = document.getElementById('statusIcon');
+            const text = document.getElementById('statusText');
+            
+            display.classList.remove('checking');
+            icon.innerHTML = '<i class="fas fa-id-card"></i>';
+            text.textContent = 'Waiting for RFID card...';
+        }
+        
+        function showErrorState() {
+            const display = document.getElementById('rfidDisplay');
+            const icon = document.getElementById('statusIcon');
+            const text = document.getElementById('statusText');
+            
+            display.classList.remove('checking');
+            icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+            text.textContent = 'Error occurred. Please try again.';
+            
             setTimeout(() => {
-                fetch('api/rfid_scan.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            rfid_id: rfidId,
-                            gate_location: 'main_gate'
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Scan result:', data);
+                showWaitingState();
+            }, 3000);
+        }
+        
+        function displayResult(data) {
+            const display = document.getElementById('rfidDisplay');
+            const icon = document.getElementById('statusIcon');
+            const text = document.getElementById('statusText');
+            
+            display.classList.remove('checking');
+            
+            if (data.success) {
+                if (data.access_result === 'granted') {
+                    updateStatus('ready', 'Access Granted');
+                    icon.innerHTML = '<i class="fas fa-check-circle"></i>';
+                    text.innerHTML = `<strong>ACCESS GRANTED</strong><br>${data.full_name || 'Unknown'}`;
+                    display.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
+                } else {
+                    updateStatus('error', 'Access Denied');
+                    icon.innerHTML = '<i class="fas fa-times-circle"></i>';
+                    text.innerHTML = `<strong>ACCESS DENIED</strong><br>${data.denial_reason || 'Unknown reason'}`;
+                    display.style.background = 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)';
+                }
+            } else {
+                updateStatus('error', 'Scan Error');
+                icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                text.textContent = 'Error: ' + data.message;
+                display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
+            }
 
-                        if (data.success) {
-                            const resultText = data.access_result.toUpperCase();
-                            const displayText = `${rfidId}\n${resultText}\n${data.full_name || 'Unknown'}`;
-
-                            document.getElementById('rfidDisplay').innerHTML = displayText.replace(/\n/g, '<br>');
-
-                            if (data.access_result === 'granted') {
-                                updateStatus('ready', 'Access Granted');
-                                document.getElementById('rfidDisplay').style.color = '#00ff00';
-                            } else {
-                                updateStatus('error', 'Access Denied');
-                                document.getElementById('rfidDisplay').style.color = '#ff0000';
-                            }
-                        } else {
-                            updateStatus('error', 'Scan Error');
-                            document.getElementById('rfidDisplay').textContent = 'Error: ' + data.message;
-                            document.getElementById('rfidDisplay').style.color = '#ff0000';
-                        }
-
-                        // Reset after 3 seconds
-                        setTimeout(() => {
-                            updateStatus('ready', 'Ready to scan');
-                            displayLoading();
-                            document.getElementById('rfidDisplay').style.color = '#00ff00';
-                        }, 3000);
-                    })
-                    .catch(error => {
-                        console.error('Scan error:', error);
-                        updateStatus('error', 'Connection Error');
-                        document.getElementById('rfidDisplay').textContent = 'Connection Error';
-                        document.getElementById('rfidDisplay').style.color = '#ff0000';
-
-                        setTimeout(() => {
-                            updateStatus('ready', 'Ready to scan');
-                            displayLoading();
-                            document.getElementById('rfidDisplay').style.color = '#00ff00';
-                        }, 3000);
-                    });
-            }, 1000);
+            // Reset after 3 seconds
+            setTimeout(() => {
+                updateStatus('ready', 'Ready to scan');
+                showWaitingState();
+                display.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            }, 3000);
         }
 
         // Allow Enter key to trigger manual scan
@@ -303,21 +377,10 @@
             }
         });
 
-        function displayLoading() {
-            const loading = document.getElementById('rfidDisplay');
-            const states = [
-                'Waiting for RFID card',
-                'Waiting for RFID card.',
-                'Waiting for RFID card..',
-                'Waiting for RFID card...'
-            ];
-            let index = 0;
-
-            setInterval(() => {
-                loading.textContent = states[index];
-                index = (index + 1) % states.length; // loop back to 0
-            }, 500); // update every 500ms for smooth animation
-        }
+        // Initialize the waiting state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            showWaitingState();
+        });
 
         const input = document.getElementById('manualRFID');
         setInterval(() => {
@@ -328,8 +391,6 @@
 
         // Auto-focus on manual input
         input.focus();
-
-        displayLoading();
     </script>
 </body>
 
