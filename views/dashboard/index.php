@@ -3,7 +3,8 @@
  * Admin Dashboard - Main page showing RFID access logs
  */
 
-require_once 'models/Admin.php';
+require_once __DIR__ . "/../../models/Admin.php";
+
 
 // Validate session
 $admin = new Admin();

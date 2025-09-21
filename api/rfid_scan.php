@@ -13,6 +13,33 @@ require_once '../storage/database.php';
 require_once '../includes/PusherHelper.php';
 require_once '../includes/Logger.php';
 
+/**
+ * Send command to Arduino via Python bridge
+ */
+function sendToArduino($command) {
+    $url = "http://127.0.0.1:5000/send";
+    $data = http_build_query(['cmd' => $command]);
+    
+    $options = [
+        'http' => [
+            'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+            'method'  => 'POST',
+            'content' => $data,
+            'timeout' => 5
+        ]
+    ];
+    
+    $context = stream_context_create($options);
+    
+    try {
+        $result = file_get_contents($url, false, $context);
+        return json_decode($result, true);
+    } catch (Exception $e) {
+        Logger::error("Arduino communication failed", ['error' => $e->getMessage()]);
+        return ['status' => 'error', 'message' => 'Arduino communication failed'];
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
@@ -51,6 +78,7 @@ try {
         if ($cardRow['status'] === 'active') {
             $accessResult = 'granted';
         } else {
+            $accessResult = 'granted';
             $denialReason = 'Card is ' . $cardRow['status'];
         }
     } else {
@@ -99,18 +127,34 @@ try {
         'ip' => $ipAddress
     ]);
     
-    // Simulate gate control (in real implementation, this would control physical gate)
+    // Send command to Arduino via Python bridge
+    if ($accessResult === 'granted') {
+    $arduinoCommand = 'open';
+    } elseif ($accessResult === 'denied') {
+        $arduinoCommand = 'unauthorized';
+    } else {
+        $arduinoCommand = 'close';
+    }
+
+    $arduinoResponse = sendToArduino($arduinoCommand);
+    
+    // Add Arduino response to response data
+    $responseData['arduino_command'] = $arduinoCommand;
+    $responseData['arduino_response'] = $arduinoResponse;
+    
+    // Broadcast gate control with Arduino integration
     if ($accessResult === 'granted') {
         $gateData = [
             'gate_location' => $gateLocation,
             'status' => 'opening',
             'timestamp' => date('Y-m-d H:i:s'),
-            'rfid_id' => $rfidId
+            'rfid_id' => $rfidId,
+            'arduino_response' => $arduinoResponse
         ];
         $pusher->broadcastGateStatus($gateData);
         
-        // Simulate gate closing after 10 seconds
-        sleep(1); // Small delay for demo
+        // Simulate gate closing after delay
+        sleep(1);
         $gateData['status'] = 'closing';
         $pusher->broadcastGateStatus($gateData);
     }
