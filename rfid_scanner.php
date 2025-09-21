@@ -18,41 +18,60 @@
         }
 
         body {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, #2d3640 100%);
+            background-color: var(--page-bg);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
         }
 
-        .scanner-card {
+        .scanner-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .main-scanner-panel {
             background: var(--white);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(58, 67, 76, 0.2);
-            max-width: 520px;
-            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(58, 67, 76, 0.1);
             border: 1px solid rgba(197, 187, 183, 0.3);
+            min-height: 600px;
+        }
+
+        .sidebar-panel {
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(58, 67, 76, 0.1);
+            border: 1px solid rgba(197, 187, 183, 0.3);
+            height: fit-content;
         }
 
         .scanner-header {
             background: linear-gradient(135deg, var(--primary-dark) 0%, #2d3640 100%);
             color: var(--white);
-            padding: 40px 30px;
+            padding: 30px 20px;
             text-align: center;
-            border-radius: 20px 20px 0 0;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .sidebar-header {
+            background: var(--panel-bg);
+            color: var(--text-dark);
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            font-weight: 600;
         }
 
         .rfid-display {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 60px 40px;
-            border-radius: 20px;
+            padding: 50px 30px;
+            border-radius: 15px;
             text-align: center;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 600;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            margin: 40px 0;
-            min-height: 200px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin: 30px 0;
+            min-height: 180px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -61,13 +80,13 @@
         }
         
         .status-icon-large {
-            font-size: 48px;
-            margin-bottom: 20px;
+            font-size: 40px;
+            margin-bottom: 15px;
             transition: all 0.3s ease;
         }
         
         .status-text {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 600;
             transition: all 0.3s ease;
         }
@@ -92,177 +111,296 @@
             to { transform: rotate(360deg); }
         }
 
+        .input-section {
+            background: var(--page-bg);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .rfid-input {
+            font-size: 18px;
+            padding: 15px 20px;
+            border: 3px solid var(--primary-dark);
+            border-radius: 10px;
+            background: var(--white);
+            color: var(--text-dark);
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(58, 67, 76, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .rfid-input:focus {
+            border-color: var(--success-green);
+            box-shadow: 0 0 0 0.2rem rgba(158, 165, 128, 0.25);
+            background: var(--white);
+            color: var(--text-dark);
+            outline: none;
+        }
+
+        .rfid-input::placeholder {
+            color: rgba(39, 41, 41, 0.6);
+            font-weight: 500;
+        }
+
         .btn-scan {
             background: linear-gradient(135deg, var(--success-green), #8a9470);
             border: none;
-            border-radius: 12px;
-            padding: 18px 35px;
+            border-radius: 10px;
+            padding: 15px 30px;
             font-weight: 600;
             color: var(--white);
-            font-size: 18px;
+            font-size: 16px;
             transition: all 0.3s ease;
+            width: 100%;
         }
 
         .btn-scan:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(158, 165, 128, 0.4);
+            box-shadow: 0 6px 20px rgba(158, 165, 128, 0.4);
             color: var(--white);
         }
 
-        .form-control {
-            border-radius: 10px;
-            border: 2px solid rgba(197, 187, 183, 0.5);
-            background-color: var(--white);
-            color: var(--text-dark);
+        .sample-rfids {
+            padding: 20px;
         }
 
-        .form-control:focus {
-            border-color: var(--primary-dark);
-            box-shadow: 0 0 0 0.2rem rgba(58, 67, 76, 0.25);
+        .sample-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: var(--page-bg);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
         }
 
-        .btn-outline-primary {
-            border: 2px solid var(--primary-dark);
+        .sample-item:hover {
+            background: rgba(158, 165, 128, 0.1);
+            border-color: var(--success-green);
+            transform: translateX(5px);
+        }
+
+        .sample-rfid {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
             color: var(--primary-dark);
-            border-radius: 10px;
         }
 
-        .btn-outline-primary:hover {
-            background-color: var(--primary-dark);
-            color: var(--white);
+        .sample-name {
+            font-size: 12px;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .sample-status {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-inactive {
+            background: #dc3545;
+            color: white;
+        }
+
+        .status-unknown {
+            background: #6c757d;
+            color: white;
         }
 
         .btn-outline-secondary {
-            border: 2px solid var(--panel-bg);
-            color: var(--text-dark);
+            border: 2px solid var(--primary-dark);
+            color: var(--primary-dark);
             border-radius: 10px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
 
         .btn-outline-secondary:hover {
-            background-color: var(--panel-bg);
-            color: var(--text-dark);
+            background-color: var(--primary-dark);
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(58, 67, 76, 0.3);
         }
 
-        .status-indicator {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 12px;
-        }
-
-        .status-ready {
-            background-color: var(--success-green);
-        }
-
-        .status-scanning {
-            background-color: #ffc107;
-            animation: pulse 1s infinite;
-        }
-
-        .status-error {
-            background-color: #dc3545;
-        }
-
-        .card-body {
-            padding: 30px;
-            background-color: var(--white);
-            color: var(--text-dark);
-        }
-
-        .text-muted {
-            color: rgba(39, 41, 41, 0.6) !important;
-        }
-
-        @keyframes pulse {
-            0% {
-                opacity: 1;
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
             }
-
-            50% {
-                opacity: 0.5;
+            
+            .sidebar-panel {
+                margin-bottom: 20px;
             }
-
-            100% {
-                opacity: 1;
+            
+            .rfid-display {
+                min-height: 150px;
+                padding: 30px 20px;
+            }
+            
+            .status-icon-large {
+                font-size: 32px;
+            }
+            
+            .status-text {
+                font-size: 16px;
+            }
+            
+            .rfid-input {
+                font-size: 16px;
+                padding: 12px 15px;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="scanner-card">
-        <div class="scanner-header">
-            <i class="fas fa-wifi fa-3x mb-3"></i>
-            <h3>RFID Scanner Simulator</h3>
-            <p class="mb-0">Holy Family High School Gate</p>
-        </div>
+    <div class="scanner-container">
+        <div class="row">
+            <!-- Left Main Scanner -->
+            <div class="col-lg-8 col-md-7">
+                <div class="main-scanner-panel">
+                    <div class="scanner-header">
+                        <i class="fas fa-wifi fa-3x mb-3"></i>
+                        <h3>RFID Scanner Simulator</h3>
+                        <p class="mb-0">Holy Family High School Gate</p>
+                    </div>
 
-        <div class="card-body p-4">
-            <div class="text-center mb-4">
-                <div class="status-indicator status-ready" id="statusIndicator"></div>
-                <span id="statusText">Ready to scan</span>
+                    <div class="p-4">
+                        <!-- RFID Display -->
+                        <div class="rfid-display" id="rfidDisplay">
+                            <div id="statusIcon" class="status-icon-large">
+                                <i class="fas fa-id-card"></i>
+                            </div>
+                            <div id="statusText" class="status-text">
+                                Waiting for RFID card...
+                            </div>
+                        </div>
+
+                        <!-- Input Section -->
+                        <div class="input-section">
+                            <label class="font-weight-bold text-dark mb-3">
+                                <i class="fas fa-keyboard"></i> Manual RFID Entry
+                            </label>
+                            <div class="row">
+                                <div class="col-8">
+                                    <input type="text" class="form-control rfid-input" id="manualRFID" 
+                                           placeholder="Enter RFID ID...">
+                                </div>
+                                <div class="col-4">
+                                    <button class="btn btn-scan" onclick="scanManualRFID()">
+                                        <i class="fas fa-search"></i> Scan
+                                    </button>
+                                </div>
+                            </div>
+                            <small class="text-muted mt-2 d-block">
+                                <i class="fas fa-info-circle"></i> 
+                                Type an RFID ID or click sample cards on the right
+                            </small>
+                        </div>
+
+                        <!-- Navigation -->
+                        <div class="text-center mt-4">
+                            <a href="index.php" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="rfid-display" id="rfidDisplay">
-                <div id="statusIcon" class="status-icon-large">
-                    <i class="fas fa-id-card"></i>
+            <!-- Right Sidebar -->
+            <div class="col-lg-4 col-md-5">
+                <div class="sidebar-panel">
+                    <div class="sidebar-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-list"></i> Sample RFIDs
+                        </h6>
+                    </div>
+                    
+                    <!-- Sample RFIDs -->
+                    <div class="sample-rfids">
+                        <h6 class="text-muted mb-3">
+                            <i class="fas fa-id-card"></i> Click to Test
+                        </h6>
+                        <div class="sample-item" onclick="scanRFID('RFID001')">
+                            <div>
+                                <div class="sample-rfid">RFID001</div>
+                                <div class="sample-name">John Doe - Student</div>
+                            </div>
+                            <span class="sample-status status-active">ACTIVE</span>
+                        </div>
+                        <div class="sample-item" onclick="scanRFID('RFID002')">
+                            <div>
+                                <div class="sample-rfid">RFID002</div>
+                                <div class="sample-name">Jane Smith - Teacher</div>
+                            </div>
+                            <span class="sample-status status-active">ACTIVE</span>
+                        </div>
+                        <div class="sample-item" onclick="scanRFID('RFID003')">
+                            <div>
+                                <div class="sample-rfid">RFID003</div>
+                                <div class="sample-name">Mike Johnson - Staff</div>
+                            </div>
+                            <span class="sample-status status-active">ACTIVE</span>
+                        </div>
+                        <div class="sample-item" onclick="scanRFID('RFID005')">
+                            <div>
+                                <div class="sample-rfid">RFID005</div>
+                                <div class="sample-name">Test User - Student</div>
+                            </div>
+                            <span class="sample-status status-inactive">INACTIVE</span>
+                        </div>
+                        <div class="sample-item" onclick="scanRFID('UNKNOWN')">
+                            <div>
+                                <div class="sample-rfid">UNKNOWN</div>
+                                <div class="sample-name">Unregistered Card</div>
+                            </div>
+                            <span class="sample-status status-unknown">NOT FOUND</span>
+                        </div>
+                    </div>
                 </div>
-                <div id="statusText" class="status-text">
-                    Waiting for RFID card...
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-8">
-                    <input type="text" class="form-control" id="manualRFID" placeholder="Enter RFID ID manually" Auto-focus>
-                </div>
-                <div class="col-md-4">
-                    <button class="btn btn-outline-primary btn-block" onclick="scanManualRFID()">
-                        <i class="fas fa-keyboard"></i> Manual
-                    </button>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-6">
-                    <small class="text-muted">Sample RFIDs:</small>
-                    <ul class="list-unstyled small">
-                        <li><code>RFID001</code> - John Doe</li>
-                        <li><code>RFID002</code> - Jane Smith</li>
-                        <li><code>RFID003</code> - Mike Johnson</li>
-                    </ul>
-                </div>
-                <div class="col-6">
-                    <small class="text-muted">Test Cases:</small>
-                    <ul class="list-unstyled small">
-                        <li><code>RFID004</code> - Active</li>
-                        <li><code>RFID005</code> - Visitor</li>
-                        <li><code>UNKNOWN</code> - Not found</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="text-center mt-4">
-                <a href="index.php" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left"></i> Back to Dashboard
-                </a>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     <script>
-        const sampleRFIDs = ['RFID001', 'RFID002', 'RFID003', 'RFID004', 'RFID005', 'UNKNOWN', 'EXPIRED001'];
-
-        function updateStatus(status, text) {
-            const indicator = document.getElementById('statusIndicator');
-            const statusText = document.getElementById('statusText');
-
-            indicator.className = 'status-indicator status-' + status;
-            statusText.textContent = text;
-        }
+        // Initialize Pusher for real-time updates
+        const pusher = new Pusher('5b24b867b55f7decb7a5', {
+            cluster: 'ap1',
+            useTLS: true
+        });
+        
+        // Debug Pusher connection
+        pusher.connection.bind('connected', function() {
+            console.log('✅ Pusher connected successfully (Scanner)');
+        });
+        
+        pusher.connection.bind('error', function(err) {
+            console.error('❌ Pusher connection error (Scanner):', err);
+        });
+        
+        // Subscribe to RFID access channel
+        const rfidChannel = pusher.subscribe('rfid-access-channel');
+        
+        rfidChannel.bind('pusher:subscription_succeeded', function() {
+            console.log('✅ Successfully subscribed to rfid-access-channel (Scanner)');
+        });
 
         function scanManualRFID() {
             const manualRFID = document.getElementById('manualRFID').value.trim();
@@ -275,8 +413,6 @@
         }
 
         function scanRFID(rfidId) {
-            updateStatus('scanning', 'Scanning...');
-            
             // Show checking state
             showCheckingState();
 
@@ -291,7 +427,20 @@
                     gate_location: 'main_gate'
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(text => {
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error('Invalid JSON response:', text);
+                    throw new Error('Server returned invalid JSON response');
+                }
+            })
             .then(data => {
                 console.log('Scan result:', data);
                 displayResult(data);
@@ -345,18 +494,15 @@
             
             if (data.success) {
                 if (data.access_result === 'granted') {
-                    updateStatus('ready', 'Access Granted');
                     icon.innerHTML = '<i class="fas fa-check-circle"></i>';
                     text.innerHTML = `<strong>ACCESS GRANTED</strong><br>${data.full_name || 'Unknown'}`;
                     display.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
                 } else {
-                    updateStatus('error', 'Access Denied');
                     icon.innerHTML = '<i class="fas fa-times-circle"></i>';
                     text.innerHTML = `<strong>ACCESS DENIED</strong><br>${data.denial_reason || 'Unknown reason'}`;
                     display.style.background = 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)';
                 }
             } else {
-                updateStatus('error', 'Scan Error');
                 icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
                 text.textContent = 'Error: ' + data.message;
                 display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
@@ -364,7 +510,6 @@
 
             // Reset after 3 seconds
             setTimeout(() => {
-                updateStatus('ready', 'Ready to scan');
                 showWaitingState();
                 display.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
             }, 3000);
@@ -380,17 +525,11 @@
         // Initialize the waiting state on page load
         document.addEventListener('DOMContentLoaded', function() {
             showWaitingState();
+            // Focus on input after a short delay to avoid autofocus warning
+            setTimeout(() => {
+                document.getElementById('manualRFID').focus();
+            }, 500);
         });
-
-        const input = document.getElementById('manualRFID');
-        setInterval(() => {
-            if (document.activeElement !== input) {
-                input.focus();
-            }
-        }, 2000); // Focus every 2 seconds if not already focused
-
-        // Auto-focus on manual input
-        input.focus();
     </script>
 </body>
 

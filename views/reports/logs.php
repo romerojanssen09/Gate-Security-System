@@ -18,25 +18,47 @@ $currentAdmin = $admin->getAdminById($_SESSION['admin_id']);
 // Get database connection
 $conn = getConnection();
 
+// Set timezone to PHT
+date_default_timezone_set('Asia/Manila');
+
 // Handle Excel export
 if (isset($_GET['export']) && $_GET['export'] === 'excel') {
-    $startDate = $_GET['start_date'] ?? '';
-    $endDate = $_GET['end_date'] ?? '';
+    // Get export filters
+    $exportStartDate = $_GET['start_date'] ?? '';
+    $exportEndDate = $_GET['end_date'] ?? '';
+    $exportResultFilter = $_GET['result'] ?? '';
     
-    // Build query with date filters
+    // Check if any filters are applied
+    $hasFilters = !empty($exportStartDate) || !empty($exportEndDate) || !empty($exportResultFilter);
+    
+    if (!$hasFilters) {
+        // No filters selected - show error
+        header('Location: index.php?page=reports&error=no_filters');
+        exit;
+    }
+    
+    // Build query with filters
     $whereClause = "1=1";
     $params = [];
     $types = "";
     
-    if (!empty($startDate)) {
-        $whereClause .= " AND DATE(al.access_timestamp) >= ?";
-        $params[] = $startDate;
+    // Apply result filter (if selected, export only that result type)
+    if (!empty($exportResultFilter)) {
+        $whereClause .= " AND al.access_result = ?";
+        $params[] = $exportResultFilter;
         $types .= "s";
     }
     
-    if (!empty($endDate)) {
+    // Apply date filters (if selected, use date range)
+    if (!empty($exportStartDate)) {
+        $whereClause .= " AND DATE(al.access_timestamp) >= ?";
+        $params[] = $exportStartDate;
+        $types .= "s";
+    }
+    
+    if (!empty($exportEndDate)) {
         $whereClause .= " AND DATE(al.access_timestamp) <= ?";
-        $params[] = $endDate;
+        $params[] = $exportEndDate;
         $types .= "s";
     }
     
@@ -60,13 +82,29 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
         $stmt = mysqli_prepare($conn, $exportQuery);
         mysqli_stmt_bind_param($stmt, $types, ...$params);
         mysqli_stmt_execute($stmt);
-        $exportResult = mysqli_stmt_get_result($stmt);
+        $exportData = mysqli_stmt_get_result($stmt);
     } else {
-        $exportResult = mysqli_query($conn, $exportQuery);
+        $exportData = mysqli_query($conn, $exportQuery);
     }
     
-    // Generate Excel file
-    $filename = "access_logs_" . date('Y-m-d_H-i-s') . ".csv";
+    // Check if there's data to export
+    if (mysqli_num_rows($exportData) === 0) {
+        header('Location: index.php?page=reports&error=no_data');
+        exit;
+    }
+    
+    // Generate Excel file with PHT timestamp
+    $phtDate = date('Y-m-d_H-i-s');
+    $filterSuffix = '';
+    
+    if (!empty($exportResultFilter)) {
+        $filterSuffix .= '_' . $exportResultFilter;
+    }
+    if (!empty($exportStartDate) || !empty($exportEndDate)) {
+        $filterSuffix .= '_' . ($exportStartDate ?: 'all') . '_to_' . ($exportEndDate ?: 'today');
+    }
+    
+    $filename = "access_logs{$filterSuffix}_{$phtDate}.csv";
     
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -85,10 +123,10 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
         'Gate Location'
     ]);
     
-    // CSV Data
-    while ($row = mysqli_fetch_assoc($exportResult)) {
+    // CSV Data with PHT 12-hour format
+    while ($row = mysqli_fetch_assoc($exportData)) {
         fputcsv($output, [
-            $row['access_timestamp'],
+            date('M d, Y g:i:s A', strtotime($row['access_timestamp'])), // PHT 12-hour format
             $row['rfid_id'],
             $row['full_name'],
             $row['role'],
@@ -103,9 +141,9 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
     exit;
 }
 
-// Get filter parameters
+// Get filter parameters with PHT timezone defaults
 $startDate = $_GET['start_date'] ?? '';
-$endDate = $_GET['end_date'] ?? '';
+$endDate = $_GET['end_date'] ?? date('Y-m-d'); // Default to today in PHT if empty
 $result = $_GET['result'] ?? '';
 $page = max(1, intval($_GET['p'] ?? 1));
 $limit = 50;
@@ -196,6 +234,23 @@ if (!empty($paginationParams)) {
 
     <div class="main-content">
         <div class="container-fluid">
+        
+        <!-- Error Messages -->
+        <?php if (isset($_GET['error'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?php if ($_GET['error'] === 'no_filters'): ?>
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Export Error:</strong> Please select at least one filter (Result, Start Date, or End Date) before exporting.
+                <?php elseif ($_GET['error'] === 'no_data'): ?>
+                    <i class="fas fa-inbox"></i>
+                    <strong>Export Error:</strong> No data found matching your selected filters. Please adjust your filters and try again.
+                <?php endif; ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <?php endif; ?>
+        
         <!-- Filters and Export -->
         <div class="card mb-4">
             <div class="card-header">
@@ -245,7 +300,9 @@ if (!empty($paginationParams)) {
         <div class="card">
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5><i class="fas fa-list"></i> Access Logs (<span id="totalRecords"><?= number_format($totalRecords) ?></span> records)</h5>
+                    <h5>
+                        <i class="fas fa-list"></i> Access Logs (<span id="totalRecords"><?= number_format($totalRecords) ?></span> records)
+                    </h5>
                     <small class="text-muted">Page <?= $page ?> of <?= $totalPages ?></small>
                 </div>
             </div>
@@ -267,7 +324,9 @@ if (!empty($paginationParams)) {
                             <?php while ($log = mysqli_fetch_assoc($logsResult)): ?>
                             <tr>
                                 <td>
-                                    <small><?= date('M d, Y H:i:s', strtotime($log['access_timestamp'])) ?></small>
+                                    <small><?= date('M d, Y', strtotime($log['access_timestamp'])) ?></small>
+                                    <br/>
+                                    <small class="text-muted"><?= date('g:i:s A', strtotime($log['access_timestamp'])) ?></small>
                                 </td>
                                 <td><code><?= htmlspecialchars($log['rfid_id']) ?></code></td>
                                 <td><?= htmlspecialchars($log['full_name'] ?? 'Unknown') ?></td>
@@ -355,6 +414,10 @@ if (!empty($paginationParams)) {
             console.error('❌ Pusher connection error (Reports):', err);
         });
         
+        pusher.connection.bind('disconnected', function() {
+            console.log('⚠️ Pusher disconnected (Reports)');
+        });
+        
         // Subscribe to RFID access channel for real-time updates
         const rfidChannel = pusher.subscribe('rfid-access-channel');
         
@@ -397,7 +460,16 @@ if (!empty($paginationParams)) {
             const icon = data.access_result === 'granted' ? 'check' : 'times';
             
             newRow.innerHTML = `
-                <td><small>${new Date(data.timestamp).toLocaleString()}</small></td>
+                <td><small>${new Date(data.timestamp).toLocaleString('en-US', {
+                    timeZone: 'Asia/Manila',
+                    year: 'numeric',
+                    month: 'short',
+                    day: '2-digit',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                })}</small></td>
                 <td><code>${data.rfid_id}</code></td>
                 <td>${data.full_name || 'Unknown'}</td>
                 <td>${data.role ? '<span class="badge badge-secondary">' + data.role.charAt(0).toUpperCase() + data.role.slice(1) + '</span>' : '<span class="text-muted">-</span>'}</td>
@@ -441,29 +513,64 @@ if (!empty($paginationParams)) {
         // No polling - only Pusher real-time updates
         
         function exportToExcel() {
-            // Get today's date in YYYY-MM-DD format
-            const today = new Date().toISOString().split('T')[0];
+            // Get current filter values from the page
+            const currentStartDate = document.querySelector('input[name="start_date"]').value;
+            const currentEndDate = document.querySelector('input[name="end_date"]').value;
+            const currentResult = document.querySelector('select[name="result"]').value;
+            
+            // Get today's date in PHT timezone (YYYY-MM-DD format)
+            const today = new Date().toLocaleDateString('en-CA', {timeZone: 'Asia/Manila'});
+            
+            // Pre-fill with current filters or defaults
+            const defaultStartDate = currentStartDate || '';
+            const defaultEndDate = currentEndDate || '';
+            const defaultResult = currentResult || '';
             
             Swal.fire({
                 title: 'Export to Excel',
                 html: `
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Export Rules:</strong>
+                        <ul class="mb-0 mt-2 text-left">
+                            <li>At least one filter must be selected</li>
+                            <li>Result filter: Export only Granted or Denied records</li>
+                            <li>Date range: Export records within specified dates</li>
+                            <li>Combine filters for more specific results</li>
+                        </ul>
+                    </div>
+                    <div class="form-group text-left">
+                        <label for="export-result">Filter by Result:</label>
+                        <select id="export-result" class="form-control">
+                            <option value="">All Results</option>
+                            <option value="granted" ${defaultResult === 'granted' ? 'selected' : ''}>Granted Only</option>
+                            <option value="denied" ${defaultResult === 'denied' ? 'selected' : ''}>Denied Only</option>
+                        </select>
+                    </div>
                     <div class="form-group text-left">
                         <label for="export-start-date">Start Date:</label>
-                        <input type="date" id="export-start-date" class="form-control" value="">
+                        <input type="date" id="export-start-date" class="form-control" value="${defaultStartDate}">
                     </div>
                     <div class="form-group text-left">
                         <label for="export-end-date">End Date:</label>
-                        <input type="date" id="export-end-date" class="form-control" value="${today}">
+                        <input type="date" id="export-end-date" class="form-control" value="${defaultEndDate}">
                     </div>
-                    <small class="text-muted">Leave start date empty to export from beginning. End date defaults to today.</small>
                 `,
                 showCancelButton: true,
                 confirmButtonText: '<i class="fas fa-download"></i> Export',
                 cancelButtonText: 'Cancel',
                 confirmButtonColor: '#28a745',
+                width: '600px',
                 preConfirm: () => {
                     const startDate = document.getElementById('export-start-date').value;
                     const endDate = document.getElementById('export-end-date').value;
+                    const result = document.getElementById('export-result').value;
+                    
+                    // Check if at least one filter is selected
+                    if (!startDate && !endDate && !result) {
+                        Swal.showValidationMessage('Please select at least one filter (Result, Start Date, or End Date)');
+                        return false;
+                    }
                     
                     // Validate date range
                     if (startDate && endDate && startDate > endDate) {
@@ -471,24 +578,34 @@ if (!empty($paginationParams)) {
                         return false;
                     }
                     
-                    return { startDate, endDate };
+                    return { startDate, endDate, result };
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    const { startDate, endDate } = result.value;
+                    const { startDate, endDate, result: exportResult } = result.value;
                     
-                    // Get current filter values
-                    const currentResult = document.querySelector('select[name="result"]').value;
-                    
+                    // Build export URL with filters
                     let exportUrl = '?page=reports&export=excel';
+                    
+                    // Add filters
+                    if (exportResult) exportUrl += '&result=' + exportResult;
                     if (startDate) exportUrl += '&start_date=' + startDate;
                     if (endDate) exportUrl += '&end_date=' + endDate;
-                    if (currentResult) exportUrl += '&result=' + currentResult;
                     
-                    // Show loading
+                    // Show loading with filter info
+                    let filterInfo = [];
+                    if (exportResult) {
+                        filterInfo.push(exportResult.charAt(0).toUpperCase() + exportResult.slice(1) + ' records');
+                    }
+                    if (startDate || endDate) {
+                        filterInfo.push(`from ${startDate || 'beginning'} to ${endDate || 'today'}`);
+                    }
+                    
+                    const filterText = filterInfo.length > 0 ? filterInfo.join(' ') : 'filtered records';
+                    
                     Swal.fire({
                         title: 'Exporting...',
-                        text: 'Please wait while we prepare your Excel file',
+                        text: `Preparing ${filterText} for download`,
                         allowOutsideClick: false,
                         didOpen: () => {
                             Swal.showLoading();
@@ -505,6 +622,8 @@ if (!empty($paginationParams)) {
                 }
             });
         }
+        
+
     </script>
 </body>
 </html>

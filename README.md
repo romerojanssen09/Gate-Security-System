@@ -28,32 +28,56 @@ A modern, real-time web-based RFID access control system for managing entry/exit
 - **Bulk Operations** - Activate/deactivate multiple cards
 - **Search & Filter** - Quick card lookup and filtering options
 
-### 📈 **Advanced Reporting**
+### 📈 **Advanced Reporting & Export**
 - **Paginated Logs** - 50 records per page with smooth navigation
-- **Date Range Filtering** - Filter logs by specific date ranges
-- **Result Filtering** - View only granted or denied access attempts
-- **Excel Export** - Export filtered data with custom date ranges
-- **Real-time Updates** - New entries appear instantly on the first page
+- **Smart Filtering** - Date range and result-based filtering with PHT timezone
+- **Intelligent Export** - CSV export with mandatory filter validation
+- **12-Hour Format** - All timestamps display in user-friendly 12-hour format
+- **PHT Timezone** - Philippine Time (Asia/Manila) throughout the system
+- **Export Validation** - Prevents accidental full database exports
+- **Real-time Updates** - New entries appear instantly with proper formatting
 
 ### 🎨 **Enhanced User Experience**
-- **Animated RFID Scanner** - Visual state transitions (Waiting → Checking → Result)
-- **SweetAlert Integration** - Beautiful, responsive alert dialogs
-- **Loading Animations** - Smooth transitions and visual feedback
-- **Modern UI Design** - Clean, professional interface with custom styling
+- **Redesigned RFID Scanner** - Clean two-column layout with sample cards
+- **Real-time Connectivity** - Background WebSocket updates without UI clutter
+- **Professional Interface** - Consistent color palette and responsive design
+- **Smart Defaults** - Auto-populated filters with today's date in PHT
+- **Error Handling** - User-friendly error messages and validation
+- **Mobile Optimized** - Fully responsive across all device sizes
 
 ## 🚀 **Live Demo**
 
 ### **RFID Scanner Interface**
-The scanner provides three distinct states with smooth animations:
+The redesigned scanner features a clean, professional layout:
 
-1. **Waiting State** - "Waiting for RFID card..." with card icon
-2. **Checking State** - "Checking card data..." with spinning animation
-3. **Result State** - Shows access granted/denied with appropriate colors
+1. **Main Scanner Panel** - Large, prominent scanning interface on the left
+2. **Sample RFID Cards** - Clickable test cards on the right sidebar
+3. **Visual Feedback** - Smooth state transitions (Waiting → Checking → Result)
+4. **Real-time Processing** - Instant validation with color-coded results
 
 ### **Real-time Updates**
 - Dashboard statistics update instantly when new scans occur
-- Recent logs appear in real-time without page refresh
+- Recent logs appear in real-time with PHT timestamps
 - Reports page shows new entries immediately (first page only)
+- Background WebSocket connectivity without UI distractions
+
+## ⏰ **Timezone & Localization**
+
+### **Philippine Time (PHT) Support**
+- **System-wide PHT** - All timestamps use Asia/Manila timezone
+- **12-Hour Format** - User-friendly time display (e.g., "2:30:45 PM")
+- **Smart Defaults** - End date filters default to today in PHT
+- **Export Consistency** - CSV files maintain PHT formatting
+
+### **Export Features**
+- **Mandatory Filters** - Prevents accidental full database exports
+- **Smart Validation** - At least one filter required (Result, Start Date, or End Date)
+- **Flexible Options**:
+  - **Result Only**: Export all granted OR denied records
+  - **Date Range**: Export records within specified dates
+  - **Combined**: Export specific results within date range
+- **Error Handling** - Clear messages for invalid filters or no data found
+- **Intelligent Naming** - Filenames include applied filters and PHT timestamp
 
 ## 🛠️ **Technology Stack**
 
@@ -210,7 +234,7 @@ Content-Type: application/json
     "role": "student",
     "plate_number": "ABC123",
     "gate_location": "main_gate",
-    "timestamp": "2025-09-20 14:30:00"
+    "timestamp": "Jan 31, 2024 2:30:45 PM"
 }
 ```
 
@@ -408,6 +432,26 @@ If you encounter any issues or have questions:
 - [ ] **API Authentication** - JWT-based API security
 - [ ] **Backup & Restore** - Automated data backup system
 - [ ] **Audit Trail** - Complete system activity logging
+
+## 📝 **Recent Updates**
+
+### **v2.1.0 - Enhanced Real-time & Export System**
+- ✅ **Redesigned RFID Scanner** - Clean two-column layout with sample cards
+- ✅ **PHT Timezone Support** - System-wide Philippine Time implementation
+- ✅ **12-Hour Format** - User-friendly timestamp display throughout
+- ✅ **Smart Export System** - Mandatory filters with validation
+- ✅ **Improved Real-time** - Background updates without UI clutter
+- ✅ **Better Error Handling** - Clear messages and validation
+- ✅ **Mobile Optimization** - Enhanced responsive design
+- ✅ **Export Validation** - Prevents accidental full database exports
+
+### **Export Rules**
+| Filter Selection | Export Behavior |
+|-----------------|-----------------|
+| No filters | ❌ Error: "Select at least one filter" |
+| Result only | ✅ Export all granted OR denied records |
+| Dates only | ✅ Export all records in date range |
+| Result + Dates | ✅ Export specific result within date range |
 
 ---
 

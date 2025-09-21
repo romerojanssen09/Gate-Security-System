@@ -4,6 +4,15 @@
  * Handles RFID card scans and broadcasts real-time updates
  */
 
+// Suppress all PHP errors/warnings to prevent JSON corruption
+error_reporting(0);
+ini_set('display_errors', 0);
+
+// Clean any output buffer
+if (ob_get_level()) {
+    ob_clean();
+}
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
@@ -157,6 +166,10 @@ try {
     echo json_encode($responseData);
     
 } catch (Exception $e) {
+    // Clean any output buffer
+    if (ob_get_level()) {
+        ob_clean();
+    }
     
     http_response_code(500);
     echo json_encode([

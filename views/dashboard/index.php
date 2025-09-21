@@ -5,6 +5,8 @@
 
 require_once __DIR__ . "/../../models/Admin.php";
 
+// Set timezone to PHT
+date_default_timezone_set('Asia/Manila');
 
 // Validate session
 $admin = new Admin();
@@ -158,9 +160,9 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
                                 <?php while ($log = mysqli_fetch_assoc($logsResult)): ?>
                                 <tr>
                                     <td>
-                                        <small>
-                                            <?= date('M d, Y h:i:s', strtotime($log['access_timestamp'])) ?>
-                                        </small>
+                                        <small><?= date('M d, Y', strtotime($log['access_timestamp'])) ?></small>
+                                        <br/>
+                                        <small class="text-muted"><?= date('g:i:s A', strtotime($log['access_timestamp'])) ?></small>
                                     </td>
                                     <td>
                                         <code><?= htmlspecialchars($log['rfid_id']) ?></code>
@@ -240,6 +242,10 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
             console.error('❌ Pusher connection error:', err);
         });
         
+        pusher.connection.bind('disconnected', function() {
+            console.log('⚠️ Pusher disconnected');
+        });
+        
         // Subscribe to RFID access channel
         const rfidChannel = pusher.subscribe('rfid-access-channel');
         
@@ -280,7 +286,16 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
             const icon = data.access_result === 'granted' ? 'check' : 'times';
             
             newRow.innerHTML = `
-                <td><small>${new Date(data.timestamp).toLocaleString()}</small></td>
+                <td><small>${new Date(data.timestamp).toLocaleString('en-US', {
+                    timeZone: 'Asia/Manila',
+                    year: 'numeric',
+                    month: 'short',
+                    day: '2-digit',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                })}</small></td>
                 <td><code>${data.rfid_id}</code></td>
                 <td>${data.full_name || 'Unknown'}</td>
                 <td>${data.role ? '<span class="badge badge-secondary">' + data.role.charAt(0).toUpperCase() + data.role.slice(1) + '</span>' : '<span class="text-muted">-</span>'}</td>
@@ -372,6 +387,8 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
         function refreshLogs() {
             location.reload();
         }
+        
+
         
 
     </script>
