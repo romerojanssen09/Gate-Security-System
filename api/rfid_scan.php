@@ -11,7 +11,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 require_once '../storage/database.php';
 require_once '../includes/PusherHelper.php';
-require_once '../includes/Logger.php';
+
 
 /**
  * Send command to Arduino via Python bridge
@@ -116,16 +116,11 @@ try {
     
     // Broadcast real-time update via Pusher
     $pusher = new PusherHelper();
-    $pusher->broadcastRFIDAccess($responseData);
+    $broadcastResult = $pusher->broadcastRFIDAccess($responseData);
     
-    // Log security event
-    Logger::security("RFID Access: {$rfidId} - {$accessResult}", [
-        'rfid_id' => $rfidId,
-        'result' => $accessResult,
-        'name' => $fullName,
-        'gate' => $gateLocation,
-        'ip' => $ipAddress
-    ]);
+
+    
+
     
     // Send command to Arduino via Python bridge
     if ($accessResult === 'granted') {
@@ -162,7 +157,6 @@ try {
     echo json_encode($responseData);
     
 } catch (Exception $e) {
-    Logger::error("RFID Scan API Error", ['error' => $e->getMessage()]);
     
     http_response_code(500);
     echo json_encode([
