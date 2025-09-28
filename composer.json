@@ -1,5 +1,10 @@
 {
     "require": {
-        "pusher/pusher-php-server": "^7.2"
+        "pusher/pusher-php-server": "^6.1"
+    },
+    "config": {
+        "platform": {
+            "php": "8.0.30"
+        }
     }
 }

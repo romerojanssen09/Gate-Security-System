@@ -4,9 +4,10 @@
  * Handles RFID card scans and broadcasts real-time updates
  */
 
-// Suppress all PHP errors/warnings to prevent JSON corruption
-error_reporting(0);
-ini_set('display_errors', 0);
+// Enable error reporting for debugging (will be suppressed later)
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
 
 // Clean any output buffer
 if (ob_get_level()) {
@@ -18,8 +19,31 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
+// Test if files exist before requiring them
+$requiredFiles = [
+    '../storage/database.php',
+    '../includes/PusherHelper.php',
+    '../includes/Logger.php'
+];
+
+foreach ($requiredFiles as $file) {
+    if (!file_exists($file)) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Required file not found: ' . $file
+        ]);
+        exit;
+    }
+}
+
 require_once '../storage/database.php';
 require_once '../includes/PusherHelper.php';
+require_once '../includes/Logger.php';
+
+// Now suppress errors for clean JSON output
+error_reporting(0);
+ini_set('display_errors', 0);
 
 
 /**
@@ -34,18 +58,29 @@ function sendToArduino($command) {
             'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
             'method'  => 'POST',
             'content' => $data,
-            'timeout' => 5
+            'timeout' => 5,
+            'ignore_errors' => true
         ]
     ];
     
     $context = stream_context_create($options);
     
     try {
-        $result = file_get_contents($url, false, $context);
-        return json_decode($result, true);
+        $result = @file_get_contents($url, false, $context);
+        
+        if ($result === false) {
+            throw new Exception('Failed to connect to Python bridge');
+        }
+        
+        $decoded = json_decode($result, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('Invalid JSON response from Python bridge');
+        }
+        
+        return $decoded;
     } catch (Exception $e) {
-        Logger::error("Arduino communication failed", ['error' => $e->getMessage()]);
-        return ['status' => 'error', 'message' => 'Arduino communication failed'];
+        Logger::warning("Arduino communication failed", ['error' => $e->getMessage(), 'command' => $command]);
+        return ['status' => 'error', 'message' => 'Arduino communication failed: ' . $e->getMessage()];
     }
 }
 
@@ -57,11 +92,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 try {
     // Get JSON input
-    $input = json_decode(file_get_contents('php://input'), true);
+    $rawInput = file_get_contents('php://input');
+    Logger::debug("Raw input received", ['input' => $rawInput]);
+    
+    $input = json_decode($rawInput, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        throw new Exception('Invalid JSON input: ' . json_last_error_msg());
+    }
+    
     $rfidId = $input['rfid_id'] ?? '';
-    // $rfidId = $_GET['rfid_id'];
     $gateLocation = $input['gate_location'] ?? 'main_gate';
-    // $gateLocation = $_GET['gate_location'];
+    
+    Logger::debug("Parsed input", ['rfid_id' => $rfidId, 'gate_location' => $gateLocation]);
     
     if (empty($rfidId)) {
         throw new Exception('RFID ID is required');
@@ -69,6 +111,10 @@ try {
     
     // Get database connection
     $conn = getConnection();
+    if (!$conn) {
+        throw new Exception('Database connection failed');
+    }
+    Logger::debug("Database connection established");
     
     // Check if RFID card exists and is active
     $cardQuery = "SELECT * FROM rfid_cards WHERE rfid_id = ?";
@@ -87,7 +133,7 @@ try {
         if ($cardRow['status'] === 'active') {
             $accessResult = 'granted';
         } else {
-            $accessResult = 'granted';
+            $accessResult = 'denied';
             $denialReason = 'Card is ' . $cardRow['status'];
         }
     } else {
@@ -124,8 +170,14 @@ try {
     ];
     
     // Broadcast real-time update via Pusher
-    $pusher = new PusherHelper();
-    $broadcastResult = $pusher->broadcastRFIDAccess($responseData);
+    try {
+        $pusher = new PusherHelper();
+        $broadcastResult = $pusher->broadcastRFIDAccess($responseData);
+        Logger::debug("Pusher broadcast result", ['success' => $broadcastResult]);
+    } catch (Exception $e) {
+        Logger::error("Pusher broadcast failed", ['error' => $e->getMessage()]);
+        // Don't fail the entire request if Pusher fails
+    }
     
 
     
@@ -133,14 +185,20 @@ try {
     
     // Send command to Arduino via Python bridge
     if ($accessResult === 'granted') {
-    $arduinoCommand = 'open';
+        $arduinoCommand = 'open';
     } elseif ($accessResult === 'denied') {
         $arduinoCommand = 'unauthorized';
     } else {
         $arduinoCommand = 'close';
     }
 
-    $arduinoResponse = sendToArduino($arduinoCommand);
+    try {
+        $arduinoResponse = sendToArduino($arduinoCommand);
+        Logger::debug("Arduino command sent", ['command' => $arduinoCommand, 'response' => $arduinoResponse]);
+    } catch (Exception $e) {
+        Logger::warning("Arduino communication failed", ['error' => $e->getMessage()]);
+        $arduinoResponse = ['status' => 'error', 'message' => 'Arduino communication failed'];
+    }
     
     // Add Arduino response to response data
     $responseData['arduino_command'] = $arduinoCommand;
@@ -148,24 +206,35 @@ try {
     
     // Broadcast gate control with Arduino integration
     if ($accessResult === 'granted') {
-        $gateData = [
-            'gate_location' => $gateLocation,
-            'status' => 'opening',
-            'timestamp' => date('Y-m-d H:i:s'),
-            'rfid_id' => $rfidId,
-            'arduino_response' => $arduinoResponse
-        ];
-        $pusher->broadcastGateStatus($gateData);
-        
-        // Simulate gate closing after delay
-        sleep(1);
-        $gateData['status'] = 'closing';
-        $pusher->broadcastGateStatus($gateData);
+        try {
+            $gateData = [
+                'gate_location' => $gateLocation,
+                'status' => 'opening',
+                'timestamp' => date('Y-m-d H:i:s'),
+                'rfid_id' => $rfidId,
+                'arduino_response' => $arduinoResponse
+            ];
+            $pusher->broadcastGateStatus($gateData);
+            
+            // Simulate gate closing after delay
+            sleep(1);
+            $gateData['status'] = 'closing';
+            $pusher->broadcastGateStatus($gateData);
+        } catch (Exception $e) {
+            Logger::error("Gate status broadcast failed", ['error' => $e->getMessage()]);
+        }
     }
     
     echo json_encode($responseData);
     
 } catch (Exception $e) {
+    // Log the error
+    Logger::error("RFID scan API error", [
+        'error' => $e->getMessage(),
+        'trace' => $e->getTraceAsString(),
+        'input' => $_POST ?? $_GET ?? 'No input data'
+    ]);
+    
     // Clean any output buffer
     if (ob_get_level()) {
         ob_clean();
@@ -175,7 +244,11 @@ try {
     echo json_encode([
         'success' => false,
         'message' => 'Internal server error',
-        'error' => $e->getMessage()
+        'error' => $e->getMessage(),
+        'debug' => [
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ]
     ]);
 }
 ?>

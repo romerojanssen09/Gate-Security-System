@@ -22,7 +22,7 @@ return [
     
     // System Settings
     'log_retention_days' => 180, // 6 months
-    'enable_debug' => false,
+    'enable_debug' => true,
     'enable_alerts' => true,
     
     // File Paths

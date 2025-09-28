@@ -352,16 +352,16 @@
                         <div class="sample-item" onclick="scanRFID('RFID003')">
                             <div>
                                 <div class="sample-rfid">RFID003</div>
-                                <div class="sample-name">Mike Johnson - Staff</div>
+                                <div class="sample-name">Mike Johnson - Student</div>
                             </div>
-                            <span class="sample-status status-active">ACTIVE</span>
+                            <span class="sample-status status-inactive">INACTIVE</span>
                         </div>
                         <div class="sample-item" onclick="scanRFID('RFID005')">
                             <div>
                                 <div class="sample-rfid">RFID005</div>
-                                <div class="sample-name">Test User - Student</div>
+                                <div class="sample-name">Bob Brown - Visitor</div>
                             </div>
-                            <span class="sample-status status-inactive">INACTIVE</span>
+                            <span class="sample-status status-active">ACTIVE</span>
                         </div>
                         <div class="sample-item" onclick="scanRFID('UNKNOWN')">
                             <div>

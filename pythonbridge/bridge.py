@@ -5,8 +5,8 @@ app = Flask(__name__)
 
 # Change COM port accordingly (Windows: COM3, Linux: /dev/ttyUSB0)
 try:
-    arduino = serial.Serial("COM3", 9600, timeout=1)
-    print("Arduino connected on COM3")
+    arduino = serial.Serial("COM4", 9600, timeout=1)
+    print("Arduino connected on COM4")
 except:
     arduino = None
     print("Arduino not found - running in simulation mode")

@@ -5,8 +5,34 @@
  */
 
 class Logger {
-    private static $logPath = '../logs/';
+    private static $logPath = null;
     private static $maxFileSize = 10485760; // 10MB
+    
+    /**
+     * Initialize log path
+     */
+    private static function initLogPath() {
+        if (self::$logPath === null) {
+            // Try to determine the correct logs path
+            $possiblePaths = [
+                __DIR__ . '/../logs/',
+                dirname(__DIR__) . '/logs/',
+                'logs/'
+            ];
+            
+            foreach ($possiblePaths as $path) {
+                if (is_dir(dirname($path))) {
+                    self::$logPath = $path;
+                    break;
+                }
+            }
+            
+            // Create logs directory if it doesn't exist
+            if (!is_dir(self::$logPath)) {
+                mkdir(self::$logPath, 0755, true);
+            }
+        }
+    }
     
     /**
      * Log error message
@@ -33,8 +59,14 @@ class Logger {
      * Log debug message
      */
     public static function debug($message, $context = []) {
-        $settings = include 'config/settings.php';
-        if ($settings['enable_debug']) {
+        $settingsPath = __DIR__ . '/../config/settings.php';
+        if (file_exists($settingsPath)) {
+            $settings = include $settingsPath;
+            if (isset($settings['enable_debug']) && $settings['enable_debug']) {
+                self::writeLog('debug', $message, $context);
+            }
+        } else {
+            // Default to logging debug messages if settings file doesn't exist
             self::writeLog('debug', $message, $context);
         }
     }
@@ -53,6 +85,8 @@ class Logger {
      * Write log entry to file
      */
     private static function writeLog($level, $message, $context = []) {
+        self::initLogPath();
+        
         $timestamp = date('Y-m-d H:i:s');
         $contextStr = !empty($context) ? ' - Context: ' . json_encode($context) : '';
         $logEntry = "[$timestamp] [$level] $message$contextStr" . PHP_EOL;
@@ -65,7 +99,12 @@ class Logger {
         }
         
         // Write to log file
-        file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
+        try {
+            file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
+        } catch (Exception $e) {
+            // Fallback to error_log if file writing fails
+            error_log("Logger write failed: " . $e->getMessage() . " - Original message: $message");
+        }
         
         // Also write to PHP error log for errors
         if ($level === 'error') {
@@ -99,6 +138,7 @@ class Logger {
      * Get recent log entries
      */
     public static function getRecentLogs($level = 'error', $lines = 50) {
+        self::initLogPath();
         $logFile = self::$logPath . $level . '.log';
         
         if (!file_exists($logFile)) {
@@ -128,6 +168,7 @@ class Logger {
      * Clear log file
      */
     public static function clearLog($level) {
+        self::initLogPath();
         $logFile = self::$logPath . $level . '.log';
         if (file_exists($logFile)) {
             file_put_contents($logFile, '');
