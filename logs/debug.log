@@ -83,3 +83,53 @@
 [2025-09-28 08:41:31] [debug] Database connection established
 [2025-09-28 08:41:31] [debug] Pusher broadcast result - Context: {"success":true}
 [2025-09-28 08:41:31] [debug] Arduino command sent - Context: {"command":"open","response":{"command":"open","mode":"arduino","status":"sent"}}
+[2025-09-28 09:22:20] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"0012084805\",\"gate_location\":\"main_gate\"}"}
+[2025-09-28 09:22:20] [debug] Parsed input - Context: {"rfid_id":"0012084805","gate_location":"main_gate"}
+[2025-09-28 09:22:20] [debug] Database connection established
+[2025-09-28 09:22:21] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-09-28 09:22:23] [debug] Arduino command sent - Context: {"command":"open","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2025-09-28 09:24:22] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"0012084805\",\"gate_location\":\"main_gate\"}"}
+[2025-09-28 09:24:22] [debug] Parsed input - Context: {"rfid_id":"0012084805","gate_location":"main_gate"}
+[2025-09-28 09:24:22] [debug] Database connection established
+[2025-09-28 09:24:22] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-09-28 09:24:22] [debug] Arduino command sent - Context: {"command":"open","response":{"command":"open","mode":"arduino","status":"sent"}}
+[2025-09-28 09:25:45] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"0012084805\",\"gate_location\":\"main_gate\"}"}
+[2025-09-28 09:25:45] [debug] Parsed input - Context: {"rfid_id":"0012084805","gate_location":"main_gate"}
+[2025-09-28 09:25:45] [debug] Database connection established
+[2025-09-28 09:25:45] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-09-28 09:25:45] [debug] Arduino command sent - Context: {"command":"open","response":{"command":"open","mode":"arduino","status":"sent"}}
+[2025-09-28 09:32:55] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"0012084805\",\"gate_location\":\"main_gate\"}"}
+[2025-09-28 09:32:55] [debug] Parsed input - Context: {"rfid_id":"0012084805","gate_location":"main_gate"}
+[2025-09-28 09:32:55] [debug] Database connection established
+[2025-09-28 09:32:55] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-09-28 09:32:55] [debug] Arduino command sent - Context: {"command":"open","response":{"command":"open","mode":"arduino","status":"sent"}}
+[2025-09-28 09:32:55] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"0012084805\",\"gate_location\":\"main_gate\"}"}
+[2025-09-28 09:32:55] [debug] Parsed input - Context: {"rfid_id":"0012084805","gate_location":"main_gate"}
+[2025-09-28 09:32:55] [debug] Database connection established
+[2025-09-28 09:32:56] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-09-28 09:32:56] [debug] Arduino command sent - Context: {"command":"open","response":{"command":"open","mode":"arduino","status":"sent"}}
+[2025-09-28 09:32:58] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"0012084805\",\"gate_location\":\"main_gate\"}"}
+[2025-09-28 09:32:58] [debug] Parsed input - Context: {"rfid_id":"0012084805","gate_location":"main_gate"}
+[2025-09-28 09:32:58] [debug] Database connection established
+[2025-09-28 09:32:59] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-09-28 09:32:59] [debug] Arduino command sent - Context: {"command":"open","response":{"command":"open","mode":"arduino","status":"sent"}}
+[2025-09-28 09:33:00] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"0012084805\",\"gate_location\":\"main_gate\"}"}
+[2025-09-28 09:33:00] [debug] Parsed input - Context: {"rfid_id":"0012084805","gate_location":"main_gate"}
+[2025-09-28 09:33:00] [debug] Database connection established
+[2025-09-28 09:33:00] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-09-28 09:33:00] [debug] Arduino command sent - Context: {"command":"open","response":{"command":"open","mode":"arduino","status":"sent"}}
+[2025-09-28 09:33:07] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"RFID001\",\"gate_location\":\"main_gate\"}"}
+[2025-09-28 09:33:07] [debug] Parsed input - Context: {"rfid_id":"RFID001","gate_location":"main_gate"}
+[2025-09-28 09:33:07] [debug] Database connection established
+[2025-09-28 09:33:08] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-09-28 09:33:08] [debug] Arduino command sent - Context: {"command":"unauthorized","response":{"command":"unauthorized","mode":"arduino","status":"sent"}}
+[2025-09-28 09:33:10] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"RFID003\",\"gate_location\":\"main_gate\"}"}
+[2025-09-28 09:33:10] [debug] Parsed input - Context: {"rfid_id":"RFID003","gate_location":"main_gate"}
+[2025-09-28 09:33:10] [debug] Database connection established
+[2025-09-28 09:33:10] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-09-28 09:33:10] [debug] Arduino command sent - Context: {"command":"unauthorized","response":{"command":"unauthorized","mode":"arduino","status":"sent"}}
+[2025-09-28 09:36:31] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"0012084805\",\"gate_location\":\"main_gate\"}"}
+[2025-09-28 09:36:31] [debug] Parsed input - Context: {"rfid_id":"0012084805","gate_location":"main_gate"}
+[2025-09-28 09:36:31] [debug] Database connection established
+[2025-09-28 09:36:31] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-09-28 09:36:31] [debug] Arduino command sent - Context: {"command":"open","response":{"command":"open","mode":"arduino","status":"sent"}}

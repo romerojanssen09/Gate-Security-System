@@ -270,7 +270,7 @@
     <div class="scanner-container">
         <div class="row">
             <!-- Left Main Scanner -->
-            <div class="col-lg-8 col-md-7">
+            <div class="col-lg-12 col-md-7">
                 <div class="main-scanner-panel">
                     <div class="scanner-header">
                         <i class="fas fa-wifi fa-3x mb-3"></i>
@@ -316,59 +316,6 @@
                             <a href="index.php" class="btn btn-outline-secondary btn-lg">
                                 <i class="fas fa-arrow-left"></i> Back to Dashboard
                             </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Sidebar -->
-            <div class="col-lg-4 col-md-5">
-                <div class="sidebar-panel">
-                    <div class="sidebar-header">
-                        <h6 class="mb-0">
-                            <i class="fas fa-list"></i> Sample RFIDs
-                        </h6>
-                    </div>
-                    
-                    <!-- Sample RFIDs -->
-                    <div class="sample-rfids">
-                        <h6 class="text-muted mb-3">
-                            <i class="fas fa-id-card"></i> Click to Test
-                        </h6>
-                        <div class="sample-item" onclick="scanRFID('RFID001')">
-                            <div>
-                                <div class="sample-rfid">RFID001</div>
-                                <div class="sample-name">John Doe - Student</div>
-                            </div>
-                            <span class="sample-status status-active">ACTIVE</span>
-                        </div>
-                        <div class="sample-item" onclick="scanRFID('RFID002')">
-                            <div>
-                                <div class="sample-rfid">RFID002</div>
-                                <div class="sample-name">Jane Smith - Teacher</div>
-                            </div>
-                            <span class="sample-status status-active">ACTIVE</span>
-                        </div>
-                        <div class="sample-item" onclick="scanRFID('RFID003')">
-                            <div>
-                                <div class="sample-rfid">RFID003</div>
-                                <div class="sample-name">Mike Johnson - Student</div>
-                            </div>
-                            <span class="sample-status status-inactive">INACTIVE</span>
-                        </div>
-                        <div class="sample-item" onclick="scanRFID('RFID005')">
-                            <div>
-                                <div class="sample-rfid">RFID005</div>
-                                <div class="sample-name">Bob Brown - Visitor</div>
-                            </div>
-                            <span class="sample-status status-active">ACTIVE</span>
-                        </div>
-                        <div class="sample-item" onclick="scanRFID('UNKNOWN')">
-                            <div>
-                                <div class="sample-rfid">UNKNOWN</div>
-                                <div class="sample-name">Unregistered Card</div>
-                            </div>
-                            <span class="sample-status status-unknown">NOT FOUND</span>
                         </div>
                     </div>
                 </div>

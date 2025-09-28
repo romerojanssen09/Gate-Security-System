@@ -1,3 +1,4 @@
 [2025-09-28 07:56:57] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"unauthorized"}
 [2025-09-28 07:57:32] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"unauthorized"}
 [2025-09-28 07:59:03] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"open"}
+[2025-09-28 09:22:23] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"open"}
