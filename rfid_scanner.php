@@ -235,6 +235,31 @@
             box-shadow: 0 4px 15px rgba(58, 67, 76, 0.3);
         }
 
+        .btn-success, .btn-danger {
+            border-radius: 10px;
+            padding: 15px 20px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
             body {
@@ -311,6 +336,29 @@
                             </small>
                         </div>
 
+                        <!-- Manual Gate Control Section -->
+                        <div class="input-section">
+                            <label class="font-weight-bold text-dark mb-3">
+                                <i class="fas fa-door-open"></i> Manual Gate Control
+                            </label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <button class="btn btn-success btn-block" onclick="sendManualCommand('manualopen')" id="openBtn">
+                                        <i class="fas fa-unlock"></i> Open Gate
+                                    </button>
+                                </div>
+                                <div class="col-6">
+                                    <button class="btn btn-danger btn-block" onclick="sendManualCommand('manualclose')" id="closeBtn">
+                                        <i class="fas fa-lock"></i> Close Gate
+                                    </button>
+                                </div>
+                            </div>
+                            <small class="text-muted mt-2 d-block">
+                                <i class="fas fa-exclamation-triangle"></i> 
+                                Manual gate control - use with caution
+                            </small>
+                        </div>
+
                         <!-- Navigation -->
                         <div class="text-center mt-4">
                             <a href="index.php" class="btn btn-outline-secondary btn-lg">
@@ -357,6 +405,92 @@
             } else {
                 alert('Please enter an RFID ID');
             }
+        }
+
+        function sendManualCommand(command) {
+            const openBtn = document.getElementById('openBtn');
+            const closeBtn = document.getElementById('closeBtn');
+            
+            // Disable buttons during request
+            openBtn.disabled = true;
+            closeBtn.disabled = true;
+            
+            // Show status
+            const display = document.getElementById('rfidDisplay');
+            const icon = document.getElementById('statusIcon');
+            const text = document.getElementById('statusText');
+            
+            display.classList.add('checking');
+            icon.innerHTML = '<i class="fas fa-cog"></i>';
+            text.textContent = command === 'manualopen' ? 'Opening gate manually...' : 'Closing gate manually...';
+            
+            // Send command via PHP proxy to avoid CORS issues
+            fetch('api/manual_control.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    command: command
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Manual command result:', data);
+                
+                if (data.success) {
+                    // Show success state
+                    display.classList.remove('checking');
+                    icon.innerHTML = '<i class="fas fa-check-circle"></i>';
+                    text.innerHTML = `<strong>MANUAL CONTROL</strong><br>${command === 'manualopen' ? 'Gate Opened' : 'Gate Closed'}`;
+                    display.style.background = command === 'manualopen' ? 
+                        'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)' : 
+                        'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)';
+                    
+                    // Reset after 3 seconds
+                    setTimeout(() => {
+                        showWaitingState();
+                        display.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    }, 3000);
+                } else {
+                    // Show error from server
+                    display.classList.remove('checking');
+                    icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                    text.textContent = 'Error: ' + (data.message || 'Unknown error occurred');
+                    display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
+                    
+                    // Reset after 3 seconds
+                    setTimeout(() => {
+                        showWaitingState();
+                        display.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    }, 3000);
+                }
+            })
+            .catch(error => {
+                console.error('Manual command error:', error);
+                
+                // Show error state
+                display.classList.remove('checking');
+                icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                text.textContent = 'Connection failed. Check if Python bridge is running.';
+                display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
+                
+                // Reset after 3 seconds
+                setTimeout(() => {
+                    showWaitingState();
+                    display.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                }, 3000);
+            })
+            .finally(() => {
+                // Re-enable buttons
+                openBtn.disabled = false;
+                closeBtn.disabled = false;
+            });
         }
 
         function scanRFID(rfidId) {
