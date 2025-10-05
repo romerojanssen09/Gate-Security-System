@@ -531,7 +531,7 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
             <!-- Today's Access Logs -->
             <div class="col-lg-4">
                 <div class="card">
-                    <div class="card-header" style="background: #F8F9FA; color: #001F4D; border-bottom: 2px solid #003366;">
+                    <div class="card-header" style="background: #001F4D; color: #001F4D; border-bottom: 2px solid #003366;">
                         <h5><i class="fas fa-history"></i> Today's Access Logs</h5>
                         <small class="text-muted"><?= date('F d, Y') ?></small>
                     </div>
