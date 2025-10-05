@@ -53,10 +53,10 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Gate Security System</title>
+    <title>Dashboard - Holy Family High School Gate Security</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="assets/css/app.css" rel="stylesheet">
+    <link href="assets/css/enhanced-app.css" rel="stylesheet">
 </head>
 <body>
     <?php include 'includes/navigation.php'; ?>
@@ -132,11 +132,11 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
                                 <i class="fas fa-history"></i> Recent Access Logs (Last 50)
                             </h5>
                             <div>
-                                <button class="btn btn-sm btn-outline-primary" onclick="refreshLogs()">
+                                <button class="btn btn-sm btn-outline-primary text-white" onclick="refreshLogs()">
                                     <i class="fas fa-sync-alt"></i> Refresh
                                 </button>
 
-                                <a href="index.php?page=reports" class="btn btn-sm btn-outline-secondary ml-2">
+                                <a href="index.php?page=reports" class="btn btn-sm btn-outline-secondary ml-2 text-white">
                                     <i class="fas fa-chart-bar"></i> View Reports
                                 </a>
                             </div>

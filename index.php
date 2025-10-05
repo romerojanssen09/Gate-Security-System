@@ -11,7 +11,7 @@ require_once 'storage/database.php';
 date_default_timezone_set('Asia/Manila');
 
 // Simple routing
-$page = $_GET['page'] ?? 'login';
+$page = $_GET['page'] ?? 'landing';
 $action = $_GET['action'] ?? '';
 
 // Check if user is logged in for protected pages
@@ -30,8 +30,8 @@ if ($action === 'logout') {
 
 // Route to appropriate page
 switch ($page) {
-    case 'login':
-        include 'views/auth/login.php';
+    case 'landing':
+        include 'views/landing.php';
         break;
     case 'dashboard':
         include 'views/dashboard/index.php';
@@ -46,7 +46,7 @@ switch ($page) {
         if (isset($_SESSION['admin_id'])) {
             header('Location: index.php?page=dashboard');
         } else {
-            header('Location: index.php?page=login');
+            header('Location: index.php?page=landing');
         }
         exit;
 }

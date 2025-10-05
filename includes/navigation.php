@@ -19,9 +19,12 @@ $currentPage = $_GET['page'] ?? 'dashboard';
 <!-- Sidebar Navigation -->
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <a class="sidebar-brand" href="index.php?page=dashboard">
-            <i class="fas fa-shield-alt"></i>
-            Gate Security
+        <a class="sidebar-brand" href="index.php">
+            <div class="logo-img"></div>
+            <div class="brand-text">
+                <div class="school-name">Holy Family High School</div>
+                <small class="system-name">Gate Security System</small>
+            </div>
         </a>
     </div>
     

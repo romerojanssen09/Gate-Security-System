@@ -283,3 +283,48 @@
 [2025-10-02 09:56:42] [debug] Database connection established
 [2025-10-02 09:56:44] [debug] Pusher broadcast result - Context: {"success":true}
 [2025-10-02 09:56:44] [debug] Arduino command sent - Context: {"command":"open","response":{"command":"open","mode":"arduino","status":"sent"}}
+[2025-10-05 14:10:39] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"STAFF001\",\"gate_location\":\"main_gate\"}"}
+[2025-10-05 14:10:39] [debug] Parsed input - Context: {"rfid_id":"STAFF001","gate_location":"main_gate"}
+[2025-10-05 14:10:39] [debug] Database connection established
+[2025-10-05 14:10:44] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-10-05 14:10:46] [debug] Arduino command sent - Context: {"command":"unauthorized","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2025-10-05 14:15:34] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"STUDENT001\",\"gate_location\":\"main_gate\"}"}
+[2025-10-05 14:15:34] [debug] Parsed input - Context: {"rfid_id":"STUDENT001","gate_location":"main_gate"}
+[2025-10-05 14:15:34] [debug] Database connection established
+[2025-10-05 14:15:36] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-10-05 14:15:38] [debug] Arduino command sent - Context: {"command":"unauthorized","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2025-10-05 14:32:32] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"RFID006\",\"gate_location\":\"main_gate\"}"}
+[2025-10-05 14:32:32] [debug] Parsed input - Context: {"rfid_id":"RFID006","gate_location":"main_gate"}
+[2025-10-05 14:32:32] [debug] Database connection established
+[2025-10-05 14:32:34] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-10-05 14:32:36] [debug] Arduino command sent - Context: {"command":"open","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2025-10-05 14:34:11] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"RFID002\",\"gate_location\":\"main_gate\"}"}
+[2025-10-05 14:34:11] [debug] Parsed input - Context: {"rfid_id":"RFID002","gate_location":"main_gate"}
+[2025-10-05 14:34:11] [debug] Database connection established
+[2025-10-05 14:34:12] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-10-05 14:34:14] [debug] Arduino command sent - Context: {"command":"unauthorized","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2025-10-05 14:34:46] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"RFID003\",\"gate_location\":\"main_gate\"}"}
+[2025-10-05 14:34:46] [debug] Parsed input - Context: {"rfid_id":"RFID003","gate_location":"main_gate"}
+[2025-10-05 14:34:46] [debug] Database connection established
+[2025-10-05 14:34:46] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-10-05 14:34:49] [debug] Arduino command sent - Context: {"command":"unauthorized","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2025-10-05 14:35:32] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"001F4D\",\"gate_location\":\"main_gate\"}"}
+[2025-10-05 14:35:32] [debug] Parsed input - Context: {"rfid_id":"001F4D","gate_location":"main_gate"}
+[2025-10-05 14:35:32] [debug] Database connection established
+[2025-10-05 14:35:33] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-10-05 14:35:35] [debug] Arduino command sent - Context: {"command":"unauthorized","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2025-10-05 14:40:53] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"001F4D\",\"gate_location\":\"main_gate\"}"}
+[2025-10-05 14:40:53] [debug] Parsed input - Context: {"rfid_id":"001F4D","gate_location":"main_gate"}
+[2025-10-05 14:40:53] [debug] Database connection established
+[2025-10-05 14:40:55] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-10-05 14:40:57] [debug] Arduino command sent - Context: {"command":"unauthorized","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2025-10-05 14:47:44] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"RFID006\",\"gate_location\":\"main_gate\"}"}
+[2025-10-05 14:47:44] [debug] Parsed input - Context: {"rfid_id":"RFID006","gate_location":"main_gate"}
+[2025-10-05 14:47:44] [debug] Database connection established
+[2025-10-05 14:47:46] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-10-05 14:47:48] [debug] Arduino command sent - Context: {"command":"open","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2025-10-05 14:48:07] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"RFID001\",\"gate_location\":\"main_gate\"}"}
+[2025-10-05 14:48:07] [debug] Parsed input - Context: {"rfid_id":"RFID001","gate_location":"main_gate"}
+[2025-10-05 14:48:07] [debug] Database connection established
+[2025-10-05 14:48:08] [debug] Pusher broadcast result - Context: {"success":true}
+[2025-10-05 14:48:10] [debug] Arduino command sent - Context: {"command":"open","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}

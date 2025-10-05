@@ -1,12 +1,32 @@
+<?php
+// Get database connection
+require_once 'storage/database.php';
+
+// Set timezone to PHT
+date_default_timezone_set('Asia/Manila');
+
+// Get today's access logs (limit 5)
+$conn = getConnection();
+$todayLogsQuery = "
+    SELECT al.*, rc.full_name, rc.role, rc.plate_number
+    FROM access_logs al
+    LEFT JOIN rfid_cards rc ON al.card_id = rc.id
+    WHERE DATE(al.access_timestamp) = CURDATE()
+    ORDER BY al.access_timestamp DESC
+    LIMIT 5
+";
+$todayLogsResult = mysqli_query($conn, $todayLogsQuery);
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RFID Scanner Simulator</title>
+    <title>RFID Scanner - Holy Family High School Gate Security</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="assets/css/enhanced-app.css" rel="stylesheet">
     <style>
         :root {
             --primary-dark: #3A434C;
@@ -18,10 +38,16 @@
         }
 
         body {
-            background-color: var(--page-bg);
+            background: linear-gradient(135deg, var(--page-bg) 0%, #f0ebe2 100%);
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .scanner-container {
             padding: 20px;
+            margin-top: 20px;
         }
 
         .scanner-container {
@@ -32,21 +58,20 @@
         .main-scanner-panel {
             background: var(--white);
             border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(58, 67, 76, 0.1);
-            border: 1px solid rgba(197, 187, 183, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 31, 77, 0.1);
+            border: 1px solid rgba(0, 31, 77, 0.1);
             min-height: 600px;
         }
 
-        .sidebar-panel {
+        .card {
             background: var(--white);
             border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(58, 67, 76, 0.1);
-            border: 1px solid rgba(197, 187, 183, 0.3);
-            height: fit-content;
+            box-shadow: 0 4px 20px rgba(0, 31, 77, 0.1);
+            border: 1px solid rgba(0, 31, 77, 0.1);
         }
 
         .scanner-header {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, #2d3640 100%);
+            background: linear-gradient(135deg, #001F4D 0%, #003366 100%);
             color: var(--white);
             padding: 30px 20px;
             text-align: center;
@@ -145,7 +170,7 @@
         }
 
         .btn-scan {
-            background: linear-gradient(135deg, var(--success-green), #8a9470);
+            background: linear-gradient(135deg, #28a745, #20c997);
             border: none;
             border-radius: 10px;
             padding: 15px 30px;
@@ -157,82 +182,200 @@
         }
 
         .btn-scan:hover {
+            background: linear-gradient(135deg, #20c997, #28a745);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(158, 165, 128, 0.4);
-            color: var(--white);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+            color: var(--white) !important;
         }
 
-        .sample-rfids {
-            padding: 20px;
+        .today-logs {
+            padding: 0;
         }
 
-        .sample-item {
+        .log-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 15px;
+            padding: 15px;
             margin: 8px 0;
-            background: var(--page-bg);
-            border-radius: 8px;
-            cursor: pointer;
+            background: #F8F9FA;
+            border-radius: 10px;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            border-left: 4px solid transparent;
         }
 
-        .sample-item:hover {
-            background: rgba(158, 165, 128, 0.1);
-            border-color: var(--success-green);
-            transform: translateX(5px);
+        .log-item:hover {
+            background: rgba(0, 31, 77, 0.05);
+            border-left-color: #001F4D;
+            box-shadow: 0 2px 10px rgba(0, 31, 77, 0.1);
         }
 
-        .sample-rfid {
+        .log-rfid {
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            color: var(--primary-dark);
+            color: #001F4D;
+            font-size: 13px;
         }
 
-        .sample-name {
+        .log-name {
             font-size: 12px;
-            color: var(--text-dark);
+            color: #003366;
             font-weight: 500;
+            margin-top: 2px;
         }
 
-        .sample-status {
+        .log-time {
+            font-size: 11px;
+            color: #6c757d;
+            margin-top: 2px;
+        }
+
+        .log-status {
+            text-align: right;
+        }
+
+        .log-result {
             font-size: 10px;
-            padding: 3px 8px;
+            padding: 4px 8px;
             border-radius: 12px;
             font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
         }
 
-        .status-active {
+        .result-granted {
             background: #28a745;
             color: white;
         }
 
-        .status-inactive {
+        .result-denied {
             background: #dc3545;
             color: white;
         }
 
-        .status-unknown {
-            background: #6c757d;
-            color: white;
+        .log-role {
+            font-size: 9px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
+        .no-logs {
+            padding: 20px;
+        }
+
+        .today-logs {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        /* Real-time animations */
+        .animate-new-log {
+            animation: slideInLeft 0.5s ease-out;
+            background: rgba(0, 31, 77, 0.1) !important;
+            border-left-color: #001F4D !important;
+        }
+        
+        @keyframes slideInLeft {
+            0% {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideInRight {
+            0% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            0% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        /* Real-time notification pulse effect */
+        .real-time-notification {
+            animation: slideInRight 0.3s ease, pulse 2s infinite 1s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+        }
+        
+
+
         .btn-outline-secondary {
-            border: 2px solid var(--primary-dark);
-            color: var(--primary-dark);
+            border: 2px solid #001F4D;
+            color: #001F4D;
             border-radius: 10px;
             padding: 12px 30px;
             font-weight: 600;
             transition: all 0.3s ease;
+            background: white;
         }
 
         .btn-outline-secondary:hover {
-            background-color: var(--primary-dark);
-            color: var(--white);
+            background: #001F4D;
+            color: white !important;
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(58, 67, 76, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 31, 77, 0.3);
+            border-color: #001F4D;
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid #001F4D;
+            color: #001F4D;
+            background: white;
+        }
+        
+        .btn-outline-primary:hover {
+            background: #001F4D;
+            color: white !important;
+            border-color: #001F4D;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #001F4D 0%, #003366 100%);
+            border: none;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #003366 0%, #001F4D 100%);
+            color: white !important;
+        }
+        
+        .btn-outline-info {
+            border: 2px solid #17a2b8;
+            color: #17a2b8;
+            background: white;
+        }
+        
+        .btn-outline-info:hover {
+            background: #17a2b8;
+            color: white !important;
+            border-color: #17a2b8;
         }
 
         .btn-success, .btn-danger {
@@ -260,14 +403,31 @@
             transform: none !important;
         }
 
+        /* Additional Utility Classes */
+        .d-grid {
+            display: grid;
+        }
+        
+        .gap-2 {
+            gap: 0.5rem;
+        }
+        
+        .d-grid.gap-2 > * {
+            margin-bottom: 0.5rem;
+        }
+        
+        .d-grid.gap-2 > *:last-child {
+            margin-bottom: 0;
+        }
+
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
             body {
                 padding: 10px;
             }
             
-            .sidebar-panel {
-                margin-bottom: 20px;
+            .scanner-container {
+                padding: 10px;
             }
             
             .rfid-display {
@@ -287,20 +447,26 @@
                 font-size: 16px;
                 padding: 12px 15px;
             }
+            
+            .col-lg-4 {
+                margin-top: 20px;
+            }
         }
     </style>
 </head>
 
 <body>
+
     <div class="scanner-container">
+        
         <div class="row">
-            <!-- Left Main Scanner -->
-            <div class="col-lg-12 col-md-7">
+            <!-- Main Scanner Panel -->
+            <div class="col-lg-8">
                 <div class="main-scanner-panel">
                     <div class="scanner-header">
                         <i class="fas fa-wifi fa-3x mb-3"></i>
-                        <h3>RFID Scanner Simulator</h3>
-                        <p class="mb-0">Holy Family High School Gate</p>
+                        <h3>RFID Scanner Interface</h3>
+                        <p class="mb-0">Real-time Gate Control System</p>
                     </div>
 
                     <div class="p-4">
@@ -359,10 +525,68 @@
                             </small>
                         </div>
 
-                        <!-- Navigation -->
-                        <div class="text-center mt-4">
-                            <a href="index.php" class="btn btn-outline-secondary btn-lg">
-                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </div>
+                </div>
+            </div> 
+            <!-- Today's Access Logs -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header" style="background: #F8F9FA; color: #001F4D; border-bottom: 2px solid #003366;">
+                        <h5><i class="fas fa-history"></i> Today's Access Logs</h5>
+                        <small class="text-muted"><?= date('F d, Y') ?></small>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="today-logs">
+                            <?php if (mysqli_num_rows($todayLogsResult) > 0): ?>
+                                <?php while ($log = mysqli_fetch_assoc($todayLogsResult)): ?>
+                                <div class="log-item">
+                                    <div class="log-info">
+                                        <div class="log-rfid"><?= htmlspecialchars($log['rfid_id']) ?></div>
+                                        <div class="log-name"><?= htmlspecialchars($log['full_name'] ?? 'Unknown') ?></div>
+                                        <div class="log-time"><?= date('g:i A', strtotime($log['access_timestamp'])) ?></div>
+                                    </div>
+                                    <div class="log-status">
+                                        <span class="log-result <?= $log['access_result'] === 'granted' ? 'result-granted' : 'result-denied' ?>">
+                                            <i class="fas fa-<?= $log['access_result'] === 'granted' ? 'check' : 'times' ?>"></i>
+                                            <?= ucfirst($log['access_result']) ?>
+                                        </span>
+                                        <?php if ($log['role']): ?>
+                                            <small class="log-role"><?= ucfirst($log['role']) ?></small>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <?php endwhile; ?>
+                            <?php else: ?>
+                                <div class="no-logs">
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
+                                        <p class="text-muted mb-0">No access logs for today</p>
+                                        <small class="text-muted">Logs will appear here when cards are scanned</small>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="card mt-3">
+                    <div class="card-header" style="background: #001F4D; color: #001F4D; border-bottom: 2px solid #003366;">
+                        <h5 class="text-white"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="index.php" class="btn btn-outline-primary">
+                                <i class="fas fa-home"></i> Landing Page
+                            </a>
+                            <a href="index.php?page=dashboard" class="btn btn-primary">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                            <a href="index.php?page=rfid" class="btn btn-outline-secondary">
+                                <i class="fas fa-users"></i> User Management
+                            </a>
+                            <a href="index.php?page=reports" class="btn btn-outline-info">
+                                <i class="fas fa-chart-bar"></i> Reports
                             </a>
                         </div>
                     </div>
@@ -390,11 +614,21 @@
             console.error('❌ Pusher connection error (Scanner):', err);
         });
         
+        pusher.connection.bind('disconnected', function() {
+            console.log('⚠️ Pusher disconnected (Scanner)');
+        });
+        
         // Subscribe to RFID access channel
         const rfidChannel = pusher.subscribe('rfid-access-channel');
         
         rfidChannel.bind('pusher:subscription_succeeded', function() {
             console.log('✅ Successfully subscribed to rfid-access-channel (Scanner)');
+        });
+        
+        // Listen for new RFID scans to update the logs
+        rfidChannel.bind('rfid-scanned', function(data) {
+            console.log('🔔 New RFID scan received:', data);
+            addNewLogToSidebar(data);
         });
 
         function scanManualRFID() {
@@ -602,6 +836,59 @@
                 scanManualRFID();
             }
         });
+
+        // Add new log entry to sidebar
+        function addNewLogToSidebar(data) {
+            const logsContainer = document.querySelector('.today-logs');
+            const noLogsElement = document.querySelector('.no-logs');
+            
+            // Remove "no logs" message if it exists
+            if (noLogsElement) {
+                noLogsElement.remove();
+            }
+            
+            // Create new log item
+            const logItem = document.createElement('div');
+            logItem.className = 'log-item animate-new-log';
+            
+            const resultClass = data.access_result === 'granted' ? 'result-granted' : 'result-denied';
+            const icon = data.access_result === 'granted' ? 'check' : 'times';
+            
+            logItem.innerHTML = `
+                <div class="log-info">
+                    <div class="log-rfid">${data.rfid_id}</div>
+                    <div class="log-name">${data.full_name || 'Unknown'}</div>
+                    <div class="log-time">${new Date().toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    })}</div>
+                </div>
+                <div class="log-status">
+                    <span class="log-result ${resultClass}">
+                        <i class="fas fa-${icon}"></i>
+                        ${data.access_result.charAt(0).toUpperCase() + data.access_result.slice(1)}
+                    </span>
+                    ${data.role ? `<small class="log-role">${data.role.charAt(0).toUpperCase() + data.role.slice(1)}</small>` : ''}
+                </div>
+            `;
+            
+            // Insert at the top
+            logsContainer.insertBefore(logItem, logsContainer.firstChild);
+            
+            // Remove animation class after animation completes
+            setTimeout(() => {
+                logItem.classList.remove('animate-new-log');
+            }, 1000);
+            
+            // Keep only 5 most recent logs
+            const logItems = logsContainer.querySelectorAll('.log-item');
+            if (logItems.length > 5) {
+                logItems[logItems.length - 1].remove();
+            }
+        }
+        
+
 
         // Initialize the waiting state on page load
         document.addEventListener('DOMContentLoaded', function() {

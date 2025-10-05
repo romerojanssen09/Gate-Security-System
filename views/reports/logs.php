@@ -223,11 +223,11 @@ if (!empty($paginationParams)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports - Gate Security System</title>
+    <title>Reports - Holy Family High School Gate Security</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <link href="assets/css/app.css" rel="stylesheet">
+    <link href="assets/css/enhanced-app.css" rel="stylesheet">
 </head>
 <body>
     <?php include 'includes/navigation.php'; ?>
@@ -303,7 +303,7 @@ if (!empty($paginationParams)) {
                     <h5>
                         <i class="fas fa-list"></i> Access Logs (<span id="totalRecords"><?= number_format($totalRecords) ?></span> records)
                     </h5>
-                    <small class="text-muted">Page <?= $page ?> of <?= $totalPages ?></small>
+                    <small class="text-white">Page <?= $page ?> of <?= $totalPages ?></small>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -394,6 +394,30 @@ if (!empty($paginationParams)) {
     </div>
     </div>
 
+    <style>
+        @keyframes slideInRight {
+            0% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            0% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
+
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
@@ -437,12 +461,11 @@ if (!empty($paginationParams)) {
         function addNewLogToReports(data) {
             const tbody = document.querySelector('#reportsTableBody');
             
-            // Only add to first page and if no filters are applied
+            // Always show new entries on first page, regardless of filters
             const currentPage = <?= $page ?>;
-            const hasFilters = '<?= $startDate . $endDate . $result ?>' !== '';
             
-            if (currentPage !== 1 || hasFilters) {
-                // Just update the record count for other pages or filtered views
+            if (currentPage !== 1) {
+                // Just update the record count for other pages
                 updateRecordCount();
                 return;
             }
