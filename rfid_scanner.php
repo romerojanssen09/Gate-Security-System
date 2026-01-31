@@ -131,9 +131,30 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
             100% { transform: scale(1); }
         }
         
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .timeout {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            animation: timeoutPulse 1.5s infinite;
+        }
+        
+        .timeout .status-icon-large {
+            animation: timeoutShake 0.5s ease-in-out;
+        }
+        
+        @keyframes timeoutPulse {
+            0%, 100% { 
+                transform: scale(1); 
+                box-shadow: 0 8px 25px rgba(255, 152, 0, 0.3);
+            }
+            50% { 
+                transform: scale(1.02); 
+                box-shadow: 0 12px 35px rgba(255, 152, 0, 0.5);
+            }
+        }
+        
+        @keyframes timeoutShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
 
         .input-section {
@@ -248,9 +269,18 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
             color: white;
         }
 
-        .result-denied {
-            background: #dc3545;
+        .result-timeout {
+            background: #ff9800;
             color: white;
+        }
+        
+        .log-item.timeout-entry {
+            border-left-color: #ff9800 !important;
+            background: rgba(255, 152, 0, 0.1) !important;
+        }
+        
+        .log-item.timeout-entry:hover {
+            background: rgba(255, 152, 0, 0.15) !important;
         }
 
         .log-role {
@@ -553,6 +583,11 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
                                         <?php if ($log['role']): ?>
                                             <small class="log-role"><?= ucfirst($log['role']) ?></small>
                                         <?php endif; ?>
+                                        <?php if ($log['denial_reason']): ?>
+                                            <small class="text-danger d-block mt-1" style="font-size: 0.75rem;">
+                                                <i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($log['denial_reason']) ?>
+                                            </small>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                                 <?php endwhile; ?>
@@ -591,7 +626,6 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
                         </div>
                     </div>
                 </div>
-            </div>
         </div>
     </div>
 
@@ -758,6 +792,13 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
             })
             .then(data => {
                 console.log('Scan result:', data);
+                
+                // Handle timeout errors silently
+                if (data.is_timeout || !data.success) {
+                    showTimeoutState(data.message || 'Please wait before scanning again');
+                    return;
+                }
+                
                 displayResult(data);
             })
             .catch(error => {
@@ -800,6 +841,22 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
             }, 3000);
         }
         
+        function showTimeoutState(message) {
+            const display = document.getElementById('rfidDisplay');
+            const icon = document.getElementById('statusIcon');
+            const text = document.getElementById('statusText');
+            
+            display.classList.remove('checking');
+            icon.innerHTML = '<i class="fas fa-clock"></i>';
+            text.innerHTML = `<strong>PLEASE WAIT</strong><br>${message}`;
+            display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
+            
+            setTimeout(() => {
+                showWaitingState();
+                display.style.background = '';
+            }, 3000);
+        }
+        
         function displayResult(data) {
             const display = document.getElementById('rfidDisplay');
             const icon = document.getElementById('statusIcon');
@@ -812,6 +869,17 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
                     icon.innerHTML = '<i class="fas fa-check-circle"></i>';
                     text.innerHTML = `<strong>ACCESS GRANTED</strong><br>${data.full_name || 'Unknown'}`;
                     display.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
+                } else if (data.is_timeout) {
+                    // Special handling for timeout
+                    display.classList.add('timeout');
+                    icon.innerHTML = '<i class="fas fa-clock"></i>';
+                    text.innerHTML = `<strong>SCAN TIMEOUT</strong><br>${data.denial_reason}`;
+                    display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
+                    
+                    // Remove timeout class after animation
+                    setTimeout(() => {
+                        display.classList.remove('timeout');
+                    }, 2000);
                 } else {
                     icon.innerHTML = '<i class="fas fa-times-circle"></i>';
                     text.innerHTML = `<strong>ACCESS DENIED</strong><br>${data.denial_reason || 'Unknown reason'}`;
@@ -823,11 +891,12 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
                 display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
             }
 
-            // Reset after 3 seconds
+            // Reset after 3 seconds (or 5 seconds for timeout to show full message)
+            const resetDelay = data.is_timeout ? 5000 : 3000;
             setTimeout(() => {
                 showWaitingState();
                 display.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-            }, 3000);
+            }, resetDelay);
         }
 
         // Allow Enter key to trigger manual scan
@@ -849,10 +918,23 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
             
             // Create new log item
             const logItem = document.createElement('div');
-            logItem.className = 'log-item animate-new-log';
+            let logClass = 'log-item animate-new-log';
+            let resultClass = '';
+            let icon = '';
             
-            const resultClass = data.access_result === 'granted' ? 'result-granted' : 'result-denied';
-            const icon = data.access_result === 'granted' ? 'check' : 'times';
+            if (data.is_timeout) {
+                logClass += ' timeout-entry';
+                resultClass = 'result-timeout';
+                icon = 'clock';
+            } else if (data.access_result === 'granted') {
+                resultClass = 'result-granted';
+                icon = 'check';
+            } else {
+                resultClass = 'result-denied';
+                icon = 'times';
+            }
+            
+            logItem.className = logClass;
             
             logItem.innerHTML = `
                 <div class="log-info">
@@ -867,9 +949,10 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
                 <div class="log-status">
                     <span class="log-result ${resultClass}">
                         <i class="fas fa-${icon}"></i>
-                        ${data.access_result.charAt(0).toUpperCase() + data.access_result.slice(1)}
+                        ${data.is_timeout ? 'Timeout' : data.access_result.charAt(0).toUpperCase() + data.access_result.slice(1)}
                     </span>
                     ${data.role ? `<small class="log-role">${data.role.charAt(0).toUpperCase() + data.role.slice(1)}</small>` : ''}
+                    ${data.denial_reason ? `<small class="text-danger d-block mt-1" style="font-size: 0.75rem;"><i class="fas fa-exclamation-circle"></i> ${data.denial_reason}</small>` : ''}
                 </div>
             `;
             

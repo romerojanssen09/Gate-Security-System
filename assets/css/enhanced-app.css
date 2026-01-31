@@ -1021,3 +1021,116 @@ select.form-control option {
         color: var(--text-dark) !important;
     }
 }
+
+/* Time In/Out Status Badges */
+.badge-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    font-weight: 600;
+    padding: 0.4em 0.8em;
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 4px rgba(23, 162, 184, 0.2);
+}
+
+.badge-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    color: #212529;
+    font-weight: 600;
+    padding: 0.4em 0.8em;
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 4px rgba(255, 193, 7, 0.2);
+}
+
+/* Enhanced badge animations */
+.badge {
+    transition: all 0.3s ease;
+}
+
+.badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Real-time update animations */
+@keyframes pulse-in {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(23, 162, 184, 0.7);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(23, 162, 184, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(23, 162, 184, 0);
+    }
+}
+
+@keyframes pulse-out {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+    }
+}
+
+.badge-info.animate-new {
+    animation: pulse-in 1s ease-out;
+}
+
+.badge-warning.animate-new {
+    animation: pulse-out 1s ease-out;
+}
+
+/* Table row highlight for new entries */
+.table-success {
+    background-color: rgba(40, 167, 69, 0.1) !important;
+    transition: background-color 3s ease;
+}
+
+.table-warning {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+    transition: background-color 3s ease;
+}
+
+/* Only apply highlight animation to dynamically added rows */
+tr.animate-new-row {
+    animation: highlightFade 3s ease-out;
+}
+
+@keyframes highlightFade {
+    0% {
+        background-color: rgba(255, 193, 7, 0.3);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* Timeout status styling */
+.badge-timeout {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    font-weight: 600;
+    padding: 0.4em 0.8em;
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+    animation: pulse-timeout 2s infinite;
+}
+
+@keyframes pulse-timeout {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}

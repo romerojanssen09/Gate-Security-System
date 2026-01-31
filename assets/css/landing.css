@@ -1,5 +1,5 @@
 /**
- * Landing Page Styles
+ * Enhanced Landing Page Styles
  * Holy Family High School - Gate Security System
  */
 
@@ -189,97 +189,156 @@ body {
     line-height: 1.6;
 }
 
-/* Gate Animation */
+/* ===== ENHANCED GATE ANIMATION - GSAP Ready ===== */
 .gate-animation-container {
     position: relative;
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
-    height: 400px;
-    background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 50%, #8FBC8F 100%);
+    height: 450px;
+    background: linear-gradient(to bottom, 
+        #87CEEB 0%, 
+        #87CEEB 40%, 
+        #98FB98 40%, 
+        #98FB98 55%,
+        #696969 55%,
+        #505050 100%
+    );
     border-radius: 15px;
     overflow: hidden;
     box-shadow: 0 8px 25px rgba(58, 67, 76, 0.15);
+    will-change: transform, opacity;
 }
 
 .gate-structure {
     position: absolute;
-    bottom: 100px;
+    bottom: 120px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     align-items: flex-end;
-    gap: 10px;
+    gap: 300px;
+    z-index: 5;
 }
 
 .gate-post {
-    width: 20px;
-    height: 80px;
-    background: linear-gradient(135deg, #666 0%, #444 100%);
-    border-radius: 4px;
+    width: 40px;
+    height: 150px;
+    background: linear-gradient(135deg, #666 0%, #444 50%, #666 100%);
+    border-radius: 6px 6px 0 0;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    will-change: transform;
+}
+
+.gate-post::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: -8px;
+    right: -8px;
+    height: 15px;
+    background: linear-gradient(135deg, #777 0%, #555 100%);
+    border-radius: 4px 4px 0 0;
+}
+
+.gate-post.left {
+    margin-left: -20px;
+}
+
+.gate-post.right {
+    margin-right: -20px;
 }
 
 .gate-barrier {
-    width: 150px;
-    height: 8px;
-    background: linear-gradient(135deg, var(--danger) 0%, #c82333 100%);
-    border-radius: 4px;
+    position: absolute;
+    width: 320px;
+    height: 12px;
+    background: repeating-linear-gradient(
+        45deg,
+        #FFD700,
+        #FFD700 25px,
+        #000 25px,
+        #000 50px
+    );
+    top: 50px;
+    left: 0;
+    border-radius: 6px;
     transform-origin: left center;
-    transition: transform 0.8s ease;
-    position: relative;
-    top: -40px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 10;
+    will-change: transform, background;
 }
 
-.gate-barrier.open {
-    transform: rotate(-90deg);
-    background: linear-gradient(135deg, var(--success-green) 0%, #28a745 100%);
+.gate-barrier::before,
+.gate-barrier::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: radial-gradient(circle, #FF0000 40%, #CC0000 100%);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    box-shadow: 0 0 12px rgba(255, 0, 0, 0.6);
+    transition: all 0.3s ease;
+}
+
+.gate-barrier::before {
+    left: 15px;
+}
+
+.gate-barrier::after {
+    right: 15px;
 }
 
 .rfid-scanner {
     position: absolute;
-    right: -60px;
-    top: -60px;
-    background: var(--panel-bg);
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    top: 30px;
+    right: -100px;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    padding: 12px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    border: 2px solid #444;
 }
 
 .scanner-display {
     background: #000;
     color: #0f0;
-    padding: 5px 10px;
-    border-radius: 4px;
+    padding: 8px 12px;
+    border-radius: 6px;
     font-family: var(--font-mono);
-    font-size: 0.8rem;
-    margin-bottom: 5px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 8px;
     text-align: center;
+    min-width: 100px;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
+    border: 1px solid #0f0;
+    will-change: contents;
 }
 
 .scanner-leds {
     display: flex;
-    gap: 5px;
+    gap: 10px;
     justify-content: center;
 }
 
 .led {
-    width: 12px;
-    height: 12px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     opacity: 0.3;
-    transition: all 0.3s ease;
+    border: 2px solid rgba(255,255,255,0.2);
+    will-change: opacity, transform, box-shadow;
 }
 
 .led.red {
-    background: var(--danger);
+    background: radial-gradient(circle, #FF0000 40%, #CC0000 100%);
 }
 
 .led.green {
-    background: #28a745;
-}
-
-.led.active {
-    opacity: 1;
-    box-shadow: 0 0 10px currentColor;
+    background: radial-gradient(circle, #00FF00 40%, #00AA00 100%);
 }
 
 .road-surface {
@@ -287,62 +346,69 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 60px;
-    background: linear-gradient(135deg, #555 0%, #333 100%);
-    border-top: 4px dashed #fff;
+    height: 120px;
+    background: linear-gradient(to bottom, #4A4A4A 0%, #303030 100%);
+    border-top: 5px dashed #FFD700;
+    z-index: 1;
 }
 
+.road-surface::after {
+    content: '';
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: repeating-linear-gradient(
+        to right,
+        #FFF 0px,
+        #FFF 40px,
+        transparent 40px,
+        transparent 80px
+    );
+}
+
+/* ===== VEHICLE ANIMATION - GSAP Ready ===== */
 .vehicle {
     position: absolute;
-    bottom: 70px;
-    left: 50px;
-    font-size: 2rem;
-    color: #007bff;
-    transition: all 1s ease;
-    z-index: 10;
+    bottom: 35px;
+    left: -120px;
+    font-size: 4.5rem;
+    color: #3498db;
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.4));
+    z-index: 15;
+    will-change: transform;
 }
 
-.vehicle.moving {
-    left: 350px;
-}
-
-.vehicle.waiting {
-    left: 250px;
-}
-
+/* ===== RFID CARD ANIMATION - GSAP Ready ===== */
 .rfid-card {
     position: absolute;
-    bottom: 120px;
-    left: 200px;
-    font-size: 1.5rem;
-    color: var(--brand-accent);
-    opacity: 0;
-    transition: all 0.5s ease;
+    bottom: 180px;
+    left: 32%;
+    transform: translateX(-50%);
+    font-size: 3rem;
+    color: #FFD700;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+    z-index: 20;
+    will-change: transform, opacity;
 }
 
-.rfid-card.scanning {
-    opacity: 1;
-    left: 320px;
-    animation: cardPulse 1s infinite;
-}
-
-@keyframes cardPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-}
-
+/* ===== ANIMATION STATUS LABEL - GSAP Ready ===== */
 .animation-label {
     position: absolute;
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.9);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text-dark);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 25;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    will-change: transform, contents;
 }
 
 /* Features Section */
@@ -475,7 +541,7 @@ body {
     line-height: 1.6;
 }
 
-/* Modal Styles */
+/* Modal Styles - Updated for GSAP */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -489,10 +555,6 @@ body {
     z-index: 2000;
 }
 
-.modal-overlay.show {
-    display: flex;
-}
-
 .modal-container {
     background: var(--white);
     border-radius: 15px;
@@ -501,18 +563,6 @@ body {
     max-width: 420px;
     width: 90%;
     border: 1px solid rgba(197, 187, 183, 0.3);
-    animation: modalSlideIn 0.3s ease;
-}
-
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-50px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .modal-header {
@@ -555,7 +605,7 @@ body {
 
 .form-control:focus {
     border-color: var(--brand-primary);
-    box-shadow: 0 0 0 0.2rem rgba(102, 51, 153, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(0, 31, 77, 0.25);
     background-color: var(--white);
 }
 
@@ -573,7 +623,6 @@ body {
 }
 
 .btn-login {
-    /* background: linear-gradient(135deg, var(--brand-primary) 0%, var(--school-purple-dark) 100%); */
     background: #001F4D;
     border: none;
     border-radius: 12px;
@@ -586,7 +635,7 @@ body {
 
 .btn-login:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 51, 153, 0.3);
+    box-shadow: 0 8px 20px rgba(0, 31, 77, 0.3);
     color: var(--white);
 }
 
@@ -686,7 +735,23 @@ body {
     }
     
     .gate-animation-container {
-        height: 300px;
+        height: 350px;
+    }
+    
+    .gate-structure {
+        gap: 200px;
+    }
+    
+    .gate-barrier {
+        width: 220px;
+    }
+    
+    .vehicle {
+        font-size: 3.5rem;
+    }
+    
+    .rfid-card {
+        font-size: 2.5rem;
     }
     
     .footer-content {
@@ -717,7 +782,23 @@ body {
     }
     
     .gate-animation-container {
-        height: 250px;
+        height: 300px;
+    }
+    
+    .gate-structure {
+        gap: 150px;
+    }
+    
+    .gate-barrier {
+        width: 170px;
+    }
+    
+    .vehicle {
+        font-size: 3rem;
+    }
+    
+    .rfid-card {
+        font-size: 2rem;
     }
     
     .modal-container {

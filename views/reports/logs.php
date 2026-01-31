@@ -69,6 +69,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
             COALESCE(rc.full_name, 'Unknown') as full_name,
             COALESCE(rc.role, 'N/A') as role,
             COALESCE(rc.plate_number, 'N/A') as plate_number,
+            COALESCE(al.access_type, 'N/A') as access_type,
             al.access_result,
             COALESCE(al.denial_reason, 'N/A') as denial_reason,
             al.gate_location
@@ -118,6 +119,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
         'Full Name',
         'Role',
         'Plate Number',
+        'Status',
         'Access Result',
         'Denial Reason',
         'Gate Location'
@@ -131,6 +133,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
             $row['full_name'],
             $row['role'],
             $row['plate_number'],
+            strtoupper(str_replace('_', ' ', $row['access_type'])),
             $row['access_result'],
             $row['denial_reason'],
             $row['gate_location']
@@ -194,7 +197,7 @@ $totalPages = ceil($totalRecords / $limit);
 
 // Get logs with pagination
 $logsQuery = "
-    SELECT al.*, rc.full_name, rc.role, rc.plate_number, rc.status
+    SELECT al.*, rc.full_name, rc.role, rc.plate_number, rc.status, al.access_type
     FROM access_logs al
     LEFT JOIN rfid_cards rc ON al.card_id = rc.id
     WHERE $whereClause
@@ -316,6 +319,7 @@ if (!empty($paginationParams)) {
                                 <th>Name</th>
                                 <th>Role</th>
                                 <th>Plate Number</th>
+                                <th>Status</th>
                                 <th>Result</th>
                                 <th>Gate</th>
                             </tr>
@@ -339,12 +343,26 @@ if (!empty($paginationParams)) {
                                 </td>
                                 <td><?= htmlspecialchars($log['plate_number'] ?? '-') ?></td>
                                 <td>
-                                    <span class="badge badge-<?= $log['access_result'] === 'granted' ? 'granted' : 'denied' ?>">
-                                        <i class="fas fa-<?= $log['access_result'] === 'granted' ? 'check' : 'times' ?>"></i>
-                                        <?= ucfirst($log['access_result']) ?>
-                                    </span>
-                                    <?php if ($log['denial_reason']): ?>
-                                        <br><small class="text-muted"><?= htmlspecialchars($log['denial_reason']) ?></small>
+                                    <?php if ($log['access_type']): ?>
+                                        <span class="badge badge-<?= $log['access_type'] === 'time_in' ? 'info' : 'warning' ?>">
+                                            <i class="fas fa-<?= $log['access_type'] === 'time_in' ? 'sign-in-alt' : 'sign-out-alt' ?>"></i>
+                                            <?= strtoupper(str_replace('_', ' ', $log['access_type'])) ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="text-muted">-</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if (!empty($log['access_result'])): ?>
+                                        <span class="badge badge-<?= $log['access_result'] === 'granted' ? 'granted' : 'denied' ?>">
+                                            <i class="fas fa-<?= $log['access_result'] === 'granted' ? 'check' : 'times' ?>"></i>
+                                            <?= ucfirst($log['access_result']) ?>
+                                        </span>
+                                        <?php if ($log['denial_reason']): ?>
+                                            <br><small class="text-muted"><?= htmlspecialchars($log['denial_reason']) ?></small>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <span class="text-muted">-</span>
                                     <?php endif; ?>
                                 </td>
                                 <td><small><?= htmlspecialchars($log['gate_location']) ?></small></td>
@@ -353,7 +371,7 @@ if (!empty($paginationParams)) {
                             
                             <?php if (mysqli_num_rows($logsResult) === 0): ?>
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
+                                <td colspan="8" class="text-center text-muted py-4">
                                     <i class="fas fa-inbox fa-2x mb-2"></i><br>
                                     No access logs found
                                 </td>
@@ -471,32 +489,50 @@ if (!empty($paginationParams)) {
             }
             
             // Check if tbody has any rows with "No access logs found" message
-            const noDataRow = tbody.querySelector('td[colspan="7"]');
+            const noDataRow = tbody.querySelector('td[colspan="8"]');
             if (noDataRow) {
                 tbody.innerHTML = ''; // Clear the "no data" message
             }
             
             const newRow = document.createElement('tr');
-            newRow.className = 'table-warning animate-new-row'; // Highlight ONLY new entry
+            newRow.className = 'animate-new-row'; // Only animation class, no background color class
             
             const badgeClass = data.access_result === 'granted' ? 'badge-granted' : 'badge-denied';
             const icon = data.access_result === 'granted' ? 'check' : 'times';
             
+            // Access type badge
+            let accessTypeBadge = '<span class="text-muted">-</span>';
+            if (data.access_type) {
+                const accessTypeClass = data.access_type === 'time_in' ? 'badge-info' : 'badge-warning';
+                const accessTypeIcon = data.access_type === 'time_in' ? 'sign-in-alt' : 'sign-out-alt';
+                const accessTypeText = data.access_type.replace('_', ' ').toUpperCase();
+                accessTypeBadge = `<span class="badge ${accessTypeClass}"><i class="fas fa-${accessTypeIcon}"></i> ${accessTypeText}</span>`;
+            }
+            
+            const dateObj = new Date(data.timestamp);
+            const dateStr = dateObj.toLocaleDateString('en-US', {
+                timeZone: 'Asia/Manila',
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit'
+            });
+            const timeStr = dateObj.toLocaleTimeString('en-US', {
+                timeZone: 'Asia/Manila',
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+            
             newRow.innerHTML = `
-                <td><small>${new Date(data.timestamp).toLocaleString('en-US', {
-                    timeZone: 'Asia/Manila',
-                    year: 'numeric',
-                    month: 'short',
-                    day: '2-digit',
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: true
-                })}</small></td>
+                <td>
+                    <small>${dateStr}<br>${timeStr}</small>
+                </td>
                 <td><code>${data.rfid_id}</code></td>
                 <td>${data.full_name || 'Unknown'}</td>
                 <td>${data.role ? '<span class="badge badge-secondary">' + data.role.charAt(0).toUpperCase() + data.role.slice(1) + '</span>' : '<span class="text-muted">-</span>'}</td>
                 <td>${data.plate_number || '-'}</td>
+                <td>${accessTypeBadge}</td>
                 <td>
                     <span class="badge ${badgeClass}">
                         <i class="fas fa-${icon}"></i> ${data.access_result.charAt(0).toUpperCase() + data.access_result.slice(1)}
@@ -511,7 +547,7 @@ if (!empty($paginationParams)) {
             
             // Remove highlight after 3 seconds (shorter duration)
             setTimeout(() => {
-                newRow.classList.remove('table-warning', 'animate-new-row');
+                newRow.classList.remove('animate-new-row');
             }, 3000);
             
             // Remove last row if we exceed the page limit

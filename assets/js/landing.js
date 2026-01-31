@@ -1,244 +1,601 @@
 /**
- * Landing Page JavaScript
+ * Enhanced Landing Page JavaScript with GSAP Animations
  * Holy Family High School - Gate Security System
  */
+
+// Register GSAP plugins
+gsap.registerPlugin(ScrollTrigger);
 
 // Animation State Management
 const AnimationState = {
     currentPhase: 'idle',
-    gatePosition: 'closed',
-    vehiclePosition: { x: 0, y: 0 },
-    scannerStatus: 'waiting',
-    cardPosition: { x: 0, y: 0, visible: false },
-    timers: {
-        phaseTimer: null,
-        resetTimer: null,
-        loopTimer: null
-    }
+    isRunning: false,
+    scenarios: [
+        { type: 'granted', probability: 0.8 },
+        { type: 'denied', probability: 0.2 }
+    ]
 };
 
-// Animation Controller
-class GateAnimationController {
+// GSAP Animation Controller
+class GSAPAnimationController {
     constructor() {
+        this.initializeElements();
+        this.setupInitialStates();
+        this.initPageAnimations();
+        this.initScrollAnimations();
+        this.init();
+    }
+    
+    initializeElements() {
         this.vehicle = document.getElementById('animatedVehicle');
         this.card = document.getElementById('animatedCard');
         this.barrier = document.getElementById('gateBarrier');
         this.display = document.getElementById('scannerDisplay');
         this.leds = document.getElementById('scannerLeds');
         this.status = document.getElementById('animationStatus');
+        this.gateContainer = document.querySelector('.gate-animation-container');
+    }
+    
+    setupInitialStates() {
+        // Set initial positions and states using GSAP
+        gsap.set(this.vehicle, { x: -120, scale: 1 });
+        gsap.set(this.card, { scale: 0, opacity: 0, y: 0 });
+        gsap.set(this.barrier, { rotation: 0 });
         
-        this.scenarios = [
-            { type: 'granted', message: 'Access Granted', probability: 0.7 },
-            { type: 'denied', message: 'Access Denied', probability: 0.3 }
-        ];
+        // Set initial LED state
+        this.setLEDState('idle');
+    }
+    
+    initPageAnimations() {
+        // Hero section entrance animation
+        const tl = gsap.timeline({ delay: 0.5 });
         
-        this.init();
+        tl.from('.school-highlight', {
+            duration: 1.2,
+            y: 50,
+            opacity: 0,
+            ease: 'power3.out'
+        })
+        .from('.system-subtitle', {
+            duration: 1,
+            y: 30,
+            opacity: 0,
+            ease: 'power2.out'
+        }, '-=0.8')
+        .from('.hero-description', {
+            duration: 1,
+            y: 20,
+            opacity: 0,
+            ease: 'power2.out'
+        }, '-=0.6')
+        .from('.gate-animation-container', {
+            duration: 1.5,
+            scale: 0.8,
+            opacity: 0,
+            ease: 'back.out(1.7)'
+        }, '-=0.4')
+        .from('.animation-label', {
+            duration: 0.8,
+            y: -20,
+            opacity: 0,
+            ease: 'power2.out'
+        }, '-=0.5');
+        
+        // Navigation animation
+        gsap.from('.landing-nav', {
+            duration: 1,
+            y: -100,
+            opacity: 0,
+            ease: 'power3.out',
+            delay: 0.2
+        });
+        
+        gsap.from('.nav-brand', {
+            duration: 1,
+            x: -50,
+            opacity: 0,
+            ease: 'power2.out',
+            delay: 0.8
+        });
+        
+        gsap.from('.nav-menu li', {
+            duration: 0.8,
+            y: -20,
+            opacity: 0,
+            stagger: 0.1,
+            ease: 'power2.out',
+            delay: 1
+        });
+    }
+    
+    initScrollAnimations() {
+        // Features section animation
+        gsap.from('.feature-card', {
+            scrollTrigger: {
+                trigger: '.features-section',
+                start: 'top 80%',
+                end: 'bottom 20%',
+                toggleActions: 'play none none reverse'
+            },
+            duration: 1,
+            y: 50,
+            opacity: 0,
+            stagger: 0.2,
+            ease: 'power2.out'
+        });
+        
+        // About section animation
+        gsap.from('.about-description', {
+            scrollTrigger: {
+                trigger: '.about-section',
+                start: 'top 80%',
+                toggleActions: 'play none none reverse'
+            },
+            duration: 1.2,
+            x: -50,
+            opacity: 0,
+            ease: 'power2.out'
+        });
+        
+        gsap.from('.stat-item', {
+            scrollTrigger: {
+                trigger: '.about-stats',
+                start: 'top 80%',
+                toggleActions: 'play none none reverse'
+            },
+            duration: 1,
+            y: 30,
+            opacity: 0,
+            stagger: 0.15,
+            ease: 'back.out(1.7)'
+        });
+        
+        gsap.from('.showcase-item', {
+            scrollTrigger: {
+                trigger: '.security-showcase',
+                start: 'top 80%',
+                toggleActions: 'play none none reverse'
+            },
+            duration: 1,
+            x: 50,
+            opacity: 0,
+            stagger: 0.2,
+            ease: 'power2.out'
+        });
+        
+        // Footer animation
+        gsap.from('.footer-content', {
+            scrollTrigger: {
+                trigger: '.landing-footer',
+                start: 'top 90%',
+                toggleActions: 'play none none reverse'
+            },
+            duration: 1,
+            y: 30,
+            opacity: 0,
+            ease: 'power2.out'
+        });
     }
     
     init() {
-        // Start the animation loop
-        this.startAnimationLoop();
+        // Start gate animation after page animations
+        setTimeout(() => this.startAnimationLoop(), 2500);
     }
     
     startAnimationLoop() {
-        // Initial delay before starting
-        setTimeout(() => {
-            this.runAnimationSequence();
-        }, 2000);
+        if (AnimationState.isRunning) return;
+        this.runFullSequence();
     }
     
-    runAnimationSequence() {
-        this.resetAnimation();
+    async runFullSequence() {
+        AnimationState.isRunning = true;
         
-        // Phase 1: Car approaches
-        this.updateStatus('Car approaching gate...');
-        this.vehicle.classList.add('waiting');
-        
-        setTimeout(() => {
-            // Phase 2: RFID scanning
-            this.startScanning();
-        }, 2000);
-    }
-    
-    startScanning() {
-        this.updateStatus('Scanning RFID card...');
-        this.display.textContent = 'Scanning...';
-        
-        // Show card animation
-        this.card.classList.add('scanning');
-        
-        // LED scanning effect
-        this.animateLEDs('scanning');
-        
-        setTimeout(() => {
-            this.processAccess();
-        }, 3000);
-    }
-    
-    processAccess() {
-        // Randomly select scenario
-        const scenario = this.getRandomScenario();
-        
-        if (scenario.type === 'granted') {
-            this.grantAccess();
-        } else {
-            this.denyAccess();
+        try {
+            // Reset everything first
+            this.resetAnimation();
+            
+            // Step 1: Car approaches gate
+            await this.step1_CarApproaches();
+            
+            // Step 2: Car stops at scanner
+            await this.step2_CarStops();
+            
+            // Step 3: Card presented and scanning
+            await this.step3_CardScanning();
+            
+            // Step 4: Process access (random grant/deny)
+            const scenario = this.getRandomScenario();
+            
+            if (scenario.type === 'granted') {
+                await this.sequenceGranted();
+            } else {
+                await this.sequenceDenied();
+            }
+            
+            // Step 5: Reset and loop
+            await this.wait(2000);
+            AnimationState.isRunning = false;
+            
+            // Start next cycle
+            setTimeout(() => this.startAnimationLoop(), 3000);
+            
+        } catch (error) {
+            console.error('Animation error:', error);
+            AnimationState.isRunning = false;
         }
     }
     
-    grantAccess() {
-        this.updateStatus('Access Granted - Gate Opening');
-        this.display.textContent = 'ACCESS GRANTED';
-        this.animateLEDs('success');
+    // STEP 1: Car approaching gate with GSAP
+    async step1_CarApproaches() {
+        this.updateStatus('Vehicle approaching gate...');
         
-        // Open gate
-        this.barrier.classList.add('open');
+        return new Promise(resolve => {
+            gsap.to(this.vehicle, {
+                duration: 2,
+                x: '32vw',
+                ease: 'power2.out',
+                onComplete: resolve
+            });
+        });
+    }
+    
+    // STEP 2: Car stops at scanner with GSAP
+    async step2_CarStops() {
+        this.updateStatus('Vehicle stopped at scanner...');
         
-        setTimeout(() => {
-            // Car moves through
-            this.updateStatus('Vehicle passing through...');
-            this.vehicle.classList.add('moving');
+        return new Promise(resolve => {
+            gsap.to(this.vehicle, {
+                duration: 0.8,
+                scale: 1.05,
+                ease: 'elastic.out(1, 0.3)',
+                yoyo: true,
+                repeat: 1,
+                onComplete: resolve
+            });
+        });
+    }
+    
+    // STEP 3: Card scanning with enhanced GSAP animations
+    async step3_CardScanning() {
+        this.updateStatus('Scanning RFID card...');
+        
+        // Show card with bounce effect
+        gsap.set(this.card, { scale: 0, opacity: 0 });
+        
+        return new Promise(resolve => {
+            const tl = gsap.timeline({
+                onComplete: resolve
+            });
             
-            setTimeout(() => {
-                // Close gate
+            tl.to(this.card, {
+                duration: 0.6,
+                scale: 1,
+                opacity: 1,
+                ease: 'back.out(1.7)'
+            })
+            .to(this.card, {
+                duration: 1.5,
+                y: -10,
+                ease: 'power1.inOut',
+                yoyo: true,
+                repeat: -1
+            }, '-=0.2');
+            
+            // Start scanning display
+            this.display.textContent = 'SCANNING...';
+            this.setLEDState('scanning');
+            
+            setTimeout(resolve, 2000);
+        });
+    }
+    
+    // GRANTED SEQUENCE with enhanced GSAP
+    async sequenceGranted() {
+        // Stop card floating animation
+        gsap.killTweensOf(this.card);
+        
+        // Access granted
+        this.updateStatus('Access Granted!');
+        this.display.textContent = 'GRANTED';
+        this.setLEDState('success');
+        
+        // Card success animation
+        return new Promise(resolve => {
+            const tl = gsap.timeline();
+            
+            tl.to(this.card, {
+                duration: 0.5,
+                scale: 1.3,
+                rotation: 360,
+                ease: 'power2.out'
+            })
+            .to(this.card, {
+                duration: 0.5,
+                scale: 0,
+                opacity: 0,
+                ease: 'power2.in'
+            })
+            .call(() => {
+                this.updateStatus('Gate opening...');
+            })
+            .to(this.barrier, {
+                duration: 1.5,
+                rotation: -85,
+                ease: 'power2.inOut',
+                onComplete: () => {
+                    this.barrier.style.background = 'repeating-linear-gradient(45deg, #00FF00, #00FF00 25px, #006600 25px, #006600 50px)';
+                }
+            })
+            .call(() => {
+                this.updateStatus('Vehicle passing through...');
+            })
+            .to(this.vehicle, {
+                duration: 2.5,
+                x: '120vw',
+                ease: 'power2.in'
+            })
+            .call(() => {
                 this.updateStatus('Gate closing...');
-                this.barrier.classList.remove('open');
-                
-                setTimeout(() => {
-                    this.completeSequence();
-                }, 2000);
-            }, 2000);
-        }, 1500);
+            })
+            .to(this.barrier, {
+                duration: 1.5,
+                rotation: 0,
+                ease: 'power2.inOut',
+                onComplete: () => {
+                    this.barrier.style.background = 'repeating-linear-gradient(45deg, #FFD700, #FFD700 25px, #000 25px, #000 50px)';
+                    this.updateStatus('System ready');
+                    this.display.textContent = 'Waiting...';
+                    this.setLEDState('idle');
+                    resolve();
+                }
+            });
+        });
     }
     
-    denyAccess() {
-        this.updateStatus('Access Denied - Gate Remains Closed');
-        this.display.textContent = 'ACCESS DENIED';
-        this.animateLEDs('error');
+    // DENIED SEQUENCE with enhanced GSAP
+    async sequenceDenied() {
+        // Stop card floating animation
+        gsap.killTweensOf(this.card);
         
-        setTimeout(() => {
-            // Car reverses
-            this.updateStatus('Vehicle reversing...');
-            this.vehicle.style.transform = 'translateX(-100px)';
+        // Access denied
+        this.updateStatus('Access Denied!');
+        this.display.textContent = 'DENIED';
+        this.setLEDState('error');
+        
+        return new Promise(resolve => {
+            const tl = gsap.timeline();
             
-            setTimeout(() => {
-                this.completeSequence();
-            }, 2000);
-        }, 2000);
+            tl.to(this.card, {
+                duration: 0.6,
+                rotation: -10,
+                ease: 'power2.inOut',
+                yoyo: true,
+                repeat: 3
+            })
+            .to(this.card, {
+                duration: 0.5,
+                scale: 0,
+                opacity: 0,
+                ease: 'power2.in'
+            })
+            .call(() => {
+                this.updateStatus('Unauthorized - Vehicle reversing...');
+            })
+            .to(this.vehicle, {
+                duration: 2.5,
+                x: -120,
+                ease: 'power2.out',
+                onComplete: () => {
+                    this.updateStatus('System ready');
+                    this.display.textContent = 'Waiting...';
+                    this.setLEDState('idle');
+                    resolve();
+                }
+            });
+        });
     }
     
-    completeSequence() {
-        this.updateStatus('Resetting system...');
-        
-        setTimeout(() => {
-            // Reset and start new cycle
-            this.runAnimationSequence();
-        }, 3000);
-    }
-    
+    // Reset all animation elements
     resetAnimation() {
-        // Reset all elements to initial state
-        this.vehicle.classList.remove('waiting', 'moving');
-        this.vehicle.style.transform = '';
-        this.card.classList.remove('scanning');
-        this.barrier.classList.remove('open');
+        // Kill all existing tweens
+        gsap.killTweensOf([this.vehicle, this.card, this.barrier]);
+        
+        // Reset positions with GSAP
+        gsap.set(this.vehicle, { x: -120, scale: 1, rotation: 0 });
+        gsap.set(this.card, { scale: 0, opacity: 0, y: 0, rotation: 0 });
+        gsap.set(this.barrier, { rotation: 0 });
+        
+        // Reset barrier color
+        this.barrier.style.background = 'repeating-linear-gradient(45deg, #FFD700, #FFD700 25px, #000 25px, #000 50px)';
+        
+        // Reset scanner
         this.display.textContent = 'Waiting...';
-        this.resetLEDs();
+        this.setLEDState('idle');
     }
     
-    animateLEDs(type) {
+    // Set LED indicator state with GSAP animations
+    setLEDState(state) {
         const redLED = this.leds.querySelector('.led.red');
         const greenLED = this.leds.querySelector('.led.green');
         
-        // Reset LEDs
-        redLED.classList.remove('active');
-        greenLED.classList.remove('active');
+        // Kill existing LED animations
+        gsap.killTweensOf([redLED, greenLED]);
         
-        switch (type) {
+        // Remove all states
+        redLED.classList.remove('active', 'blink');
+        greenLED.classList.remove('active', 'blink');
+        
+        switch (state) {
+            case 'idle':
+                redLED.classList.add('active');
+                gsap.to(redLED, { duration: 0.3, opacity: 1, ease: 'power2.out' });
+                gsap.to(greenLED, { duration: 0.3, opacity: 0.3, ease: 'power2.out' });
+                break;
+                
             case 'scanning':
-                // Alternating LED pattern
-                let scanCount = 0;
-                const scanInterval = setInterval(() => {
-                    if (scanCount % 2 === 0) {
-                        redLED.classList.add('active');
-                        greenLED.classList.remove('active');
-                    } else {
-                        redLED.classList.remove('active');
-                        greenLED.classList.add('active');
-                    }
-                    scanCount++;
-                    if (scanCount >= 6) {
-                        clearInterval(scanInterval);
-                    }
-                }, 500);
+                gsap.to([redLED, greenLED], {
+                    duration: 0.6,
+                    opacity: 1,
+                    ease: 'power2.inOut',
+                    yoyo: true,
+                    repeat: -1
+                });
                 break;
                 
             case 'success':
                 greenLED.classList.add('active');
+                gsap.to(greenLED, { duration: 0.3, opacity: 1, scale: 1.2, ease: 'back.out(1.7)' });
+                gsap.to(redLED, { duration: 0.3, opacity: 0.3, ease: 'power2.out' });
                 break;
                 
             case 'error':
                 redLED.classList.add('active');
+                gsap.to(redLED, {
+                    duration: 0.3,
+                    opacity: 1,
+                    scale: 1.2,
+                    ease: 'power2.inOut',
+                    yoyo: true,
+                    repeat: 5
+                });
+                gsap.to(greenLED, { duration: 0.3, opacity: 0.3, ease: 'power2.out' });
                 break;
         }
     }
     
-    resetLEDs() {
-        const leds = this.leds.querySelectorAll('.led');
-        leds.forEach(led => led.classList.remove('active'));
-    }
-    
+    // Update status label with GSAP animation
     updateStatus(message) {
         if (this.status) {
             this.status.textContent = message;
+            
+            gsap.fromTo(this.status, 
+                { scale: 1 },
+                { 
+                    duration: 0.3,
+                    scale: 1.05,
+                    ease: 'back.out(1.7)',
+                    yoyo: true,
+                    repeat: 1
+                }
+            );
         }
     }
     
+    // Get random scenario
     getRandomScenario() {
         const random = Math.random();
         let cumulative = 0;
         
-        for (const scenario of this.scenarios) {
+        for (const scenario of AnimationState.scenarios) {
             cumulative += scenario.probability;
             if (random <= cumulative) {
                 return scenario;
             }
         }
         
-        return this.scenarios[0]; // Fallback
+        return AnimationState.scenarios[0];
+    }
+    
+    // Helper function to wait
+    wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
 
-// Modal Management
+// Modal Management with GSAP
 function openLoginModal() {
     const modal = document.getElementById('loginModal');
     if (modal) {
-        modal.classList.add('show');
-        // Focus on username field
+        modal.style.display = 'flex';
+        
+        // GSAP animation for modal entrance
+        gsap.fromTo(modal, 
+            { opacity: 0 },
+            { duration: 0.3, opacity: 1, ease: 'power2.out' }
+        );
+        
+        gsap.fromTo(modal.querySelector('.modal-container'),
+            { scale: 0.7, y: -50, opacity: 0 },
+            { 
+                duration: 0.5, 
+                scale: 1, 
+                y: 0, 
+                opacity: 1, 
+                ease: 'back.out(1.7)',
+                delay: 0.1
+            }
+        );
+        
         setTimeout(() => {
             const usernameField = modal.querySelector('input[name="username"]');
             if (usernameField) {
                 usernameField.focus();
             }
-        }, 300);
+        }, 600);
     }
 }
 
 function closeLoginModal(event) {
     const modal = document.getElementById('loginModal');
-    if (modal && (!event || event.target === modal)) {
-        modal.classList.remove('show');
+    if (modal && (!event || event.target === modal || event.target.classList.contains('modal-close'))) {
+        
+        // GSAP animation for modal exit
+        gsap.to(modal.querySelector('.modal-container'), {
+            duration: 0.3,
+            scale: 0.7,
+            y: -50,
+            opacity: 0,
+            ease: 'power2.in'
+        });
+        
+        gsap.to(modal, {
+            duration: 0.3,
+            opacity: 0,
+            ease: 'power2.in',
+            delay: 0.1,
+            onComplete: () => {
+                modal.style.display = 'none';
+            }
+        });
     }
 }
 
-// Mobile Menu Management
+// Mobile Menu Management with GSAP
 function toggleMobileMenu() {
     const navMenu = document.querySelector('.nav-menu');
     const toggle = document.querySelector('.mobile-menu-toggle');
     
     if (navMenu && toggle) {
-        navMenu.classList.toggle('mobile-active');
-        toggle.classList.toggle('active');
+        const isActive = navMenu.classList.contains('mobile-active');
+        
+        if (!isActive) {
+            navMenu.classList.add('mobile-active');
+            toggle.classList.add('active');
+            
+            // Animate menu items
+            gsap.fromTo(navMenu.querySelectorAll('li'), 
+                { y: -20, opacity: 0 },
+                { 
+                    duration: 0.5,
+                    y: 0,
+                    opacity: 1,
+                    stagger: 0.1,
+                    ease: 'power2.out'
+                }
+            );
+        } else {
+            gsap.to(navMenu.querySelectorAll('li'), {
+                duration: 0.3,
+                y: -20,
+                opacity: 0,
+                stagger: 0.05,
+                ease: 'power2.in',
+                onComplete: () => {
+                    navMenu.classList.remove('mobile-active');
+                    toggle.classList.remove('active');
+                }
+            });
+        }
     }
 }
 
@@ -248,18 +605,27 @@ function initSmoothScrolling() {
     
     links.forEach(link => {
         link.addEventListener('click', function(e) {
-            e.preventDefault();
-            
             const targetId = this.getAttribute('href');
+            if (targetId === '#') return;
+            
+            e.preventDefault();
             const targetElement = document.querySelector(targetId);
             
             if (targetElement) {
-                const offsetTop = targetElement.offsetTop - 80; // Account for fixed nav
+                const offsetTop = targetElement.offsetTop - 80;
                 
                 window.scrollTo({
                     top: offsetTop,
                     behavior: 'smooth'
                 });
+                
+                // Close mobile menu if open
+                const navMenu = document.querySelector('.nav-menu');
+                const toggle = document.querySelector('.mobile-menu-toggle');
+                if (navMenu && navMenu.classList.contains('mobile-active')) {
+                    navMenu.classList.remove('mobile-active');
+                    toggle.classList.remove('active');
+                }
             }
         });
     });
@@ -273,20 +639,13 @@ function checkPerformanceCapabilities() {
         isMobile: false
     };
     
-    // Check for reduced motion preference
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         capabilities.preferReducedMotion = true;
         capabilities.supportsAnimations = false;
     }
     
-    // Check for mobile device
     if (window.innerWidth <= 768) {
         capabilities.isMobile = true;
-    }
-    
-    // Check for low-end device indicators
-    if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) {
-        capabilities.supportsAnimations = false;
     }
     
     return capabilities;
@@ -295,112 +654,26 @@ function checkPerformanceCapabilities() {
 // Keyboard Navigation Support
 function initKeyboardNavigation() {
     document.addEventListener('keydown', function(e) {
-        // ESC key closes modal
         if (e.key === 'Escape') {
             closeLoginModal();
-        }
-        
-        // Enter key on login button opens modal
-        if (e.key === 'Enter' && e.target.classList.contains('btn-login-modal')) {
-            openLoginModal();
         }
     });
 }
 
 // Accessibility Enhancements
 function initAccessibility() {
-    // Add ARIA labels to animation elements
     const animationContainer = document.querySelector('.gate-animation-container');
     if (animationContainer) {
         animationContainer.setAttribute('aria-label', 'Gate security system demonstration');
         animationContainer.setAttribute('role', 'img');
     }
     
-    // Add screen reader announcements for animation states
     const status = document.getElementById('animationStatus');
     if (status) {
         status.setAttribute('aria-live', 'polite');
         status.setAttribute('aria-atomic', 'true');
     }
 }
-
-// Error Handling
-class AnimationErrorHandler {
-    static handleAnimationError(error, component) {
-        console.warn(`Animation error in ${component}:`, error);
-        
-        // Implement fallback strategies
-        switch (error.type) {
-            case 'PERFORMANCE_LOW':
-                this.enableReducedMotionMode();
-                break;
-            case 'RESOURCE_LOAD_FAILED':
-                this.showStaticFallback(component);
-                break;
-            case 'BROWSER_UNSUPPORTED':
-                this.enableBasicMode();
-                break;
-            default:
-                console.error('Unhandled animation error:', error);
-        }
-    }
-    
-    static enableReducedMotionMode() {
-        document.body.classList.add('reduced-motion');
-    }
-    
-    static showStaticFallback(component) {
-        const container = document.querySelector('.gate-animation-container');
-        if (container) {
-            container.innerHTML = `
-                <div class="static-fallback">
-                    <i class="fas fa-shield-alt fa-5x" style="color: var(--brand-primary);"></i>
-                    <h3>Gate Security System</h3>
-                    <p>RFID-based access control for Holy Family High School</p>
-                </div>
-            `;
-        }
-    }
-    
-    static enableBasicMode() {
-        // Disable complex animations, keep basic functionality
-        const style = document.createElement('style');
-        style.textContent = `
-            .gate-animation-container * {
-                animation: none !important;
-                transition: none !important;
-            }
-        `;
-        document.head.appendChild(style);
-    }
-}
-
-// Initialize Everything
-document.addEventListener('DOMContentLoaded', function() {
-    try {
-        // Check performance capabilities
-        const capabilities = checkPerformanceCapabilities();
-        
-        // Initialize animation only if supported
-        if (capabilities.supportsAnimations && !capabilities.preferReducedMotion) {
-            new GateAnimationController();
-        } else {
-            AnimationErrorHandler.showStaticFallback('gate-animation');
-        }
-        
-        // Initialize other features
-        initSmoothScrolling();
-        initKeyboardNavigation();
-        initAccessibility();
-        initEventListeners();
-        
-        console.log('Landing page initialized successfully');
-        
-    } catch (error) {
-        console.error('Error initializing landing page:', error);
-        AnimationErrorHandler.handleAnimationError(error, 'initialization');
-    }
-});
 
 // Initialize Event Listeners
 function initEventListeners() {
@@ -429,13 +702,145 @@ function initEventListeners() {
             e.stopPropagation();
         });
     }
+    
+    // Modal close button
+    const modalClose = modal?.querySelector('.modal-close');
+    if (modalClose) {
+        modalClose.addEventListener('click', closeLoginModal);
+    }
 }
 
-// Handle window resize for responsive behavior
+// Initialize Everything with GSAP
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const capabilities = checkPerformanceCapabilities();
+        
+        // Initialize GSAP animation controller
+        if (capabilities.supportsAnimations && !capabilities.preferReducedMotion) {
+            new GSAPAnimationController();
+        }
+        
+        // Initialize other features
+        initSmoothScrolling();
+        initKeyboardNavigation();
+        initAccessibility();
+        initEventListeners();
+        
+        // Add hover animations to interactive elements
+        initHoverAnimations();
+        
+        console.log('Landing page with GSAP animations initialized successfully');
+        
+    } catch (error) {
+        console.error('Error initializing landing page:', error);
+    }
+});
+
+// Add hover animations for interactive elements
+function initHoverAnimations() {
+    // Feature cards hover animation
+    document.querySelectorAll('.feature-card').forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            gsap.to(card, {
+                duration: 0.3,
+                y: -10,
+                scale: 1.02,
+                boxShadow: '0 15px 35px rgba(58, 67, 76, 0.2)',
+                ease: 'power2.out'
+            });
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            gsap.to(card, {
+                duration: 0.3,
+                y: 0,
+                scale: 1,
+                boxShadow: '0 2px 15px rgba(58, 67, 76, 0.1)',
+                ease: 'power2.out'
+            });
+        });
+    });
+    
+    // Showcase items hover animation
+    document.querySelectorAll('.showcase-item').forEach(item => {
+        item.addEventListener('mouseenter', () => {
+            gsap.to(item, {
+                duration: 0.3,
+                y: -8,
+                scale: 1.02,
+                ease: 'power2.out'
+            });
+            
+            gsap.to(item.querySelector('i'), {
+                duration: 0.3,
+                scale: 1.1,
+                rotation: 5,
+                ease: 'power2.out'
+            });
+        });
+        
+        item.addEventListener('mouseleave', () => {
+            gsap.to(item, {
+                duration: 0.3,
+                y: 0,
+                scale: 1,
+                ease: 'power2.out'
+            });
+            
+            gsap.to(item.querySelector('i'), {
+                duration: 0.3,
+                scale: 1,
+                rotation: 0,
+                ease: 'power2.out'
+            });
+        });
+    });
+    
+    // Button hover animations
+    document.querySelectorAll('.btn-login-modal, .btn-login').forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+            gsap.to(btn, {
+                duration: 0.3,
+                y: -3,
+                scale: 1.05,
+                ease: 'power2.out'
+            });
+        });
+        
+        btn.addEventListener('mouseleave', () => {
+            gsap.to(btn, {
+                duration: 0.3,
+                y: 0,
+                scale: 1,
+                ease: 'power2.out'
+            });
+        });
+    });
+    
+    // Navigation links hover animation
+    document.querySelectorAll('.nav-menu a').forEach(link => {
+        link.addEventListener('mouseenter', () => {
+            gsap.to(link, {
+                duration: 0.2,
+                scale: 1.05,
+                ease: 'power2.out'
+            });
+        });
+        
+        link.addEventListener('mouseleave', () => {
+            gsap.to(link, {
+                duration: 0.2,
+                scale: 1,
+                ease: 'power2.out'
+            });
+        });
+    });
+}
+
+// Handle window resize
 window.addEventListener('resize', function() {
     const capabilities = checkPerformanceCapabilities();
     
-    // Adjust animations based on screen size
     if (capabilities.isMobile) {
         document.body.classList.add('mobile-optimized');
     } else {
@@ -443,10 +848,16 @@ window.addEventListener('resize', function() {
     }
 });
 
-// Export for potential external use
+// Pause animation when tab is not visible
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        AnimationState.isRunning = false;
+    }
+});
+
+// Export for external use
 window.LandingPageController = {
     openLoginModal,
     closeLoginModal,
-    toggleMobileMenu,
-    AnimationErrorHandler
+    toggleMobileMenu
 };

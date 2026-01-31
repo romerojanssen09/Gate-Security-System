@@ -23,7 +23,7 @@ $conn = getConnection();
 
 // Get recent access logs (last 50 entries)
 $logsQuery = "
-    SELECT al.*, rc.full_name, rc.role, rc.plate_number, rc.status
+    SELECT al.*, rc.full_name, rc.role, rc.plate_number, rc.status, al.access_type
     FROM access_logs al
     LEFT JOIN rfid_cards rc ON al.card_id = rc.id
     ORDER BY al.access_timestamp DESC
@@ -152,6 +152,7 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
                                     <th>Name</th>
                                     <th>Role</th>
                                     <th>Plate Number</th>
+                                    <th>Status</th>
                                     <th>Result</th>
                                     <th>Gate</th>
                                 </tr>
@@ -183,12 +184,26 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
                                         <?= htmlspecialchars($log['plate_number'] ?? '-') ?>
                                     </td>
                                     <td>
-                                        <span class="badge badge-<?= $log['access_result'] === 'granted' ? 'granted' : 'denied' ?>">
-                                            <i class="fas fa-<?= $log['access_result'] === 'granted' ? 'check' : 'times' ?>"></i>
-                                            <?= ucfirst($log['access_result']) ?>
-                                        </span>
-                                        <?php if ($log['denial_reason']): ?>
-                                            <br><small class="text-muted"><?= htmlspecialchars($log['denial_reason']) ?></small>
+                                        <?php if ($log['access_type']): ?>
+                                            <span class="badge badge-<?= $log['access_type'] === 'time_in' ? 'info' : 'warning' ?>">
+                                                <i class="fas fa-<?= $log['access_type'] === 'time_in' ? 'sign-in-alt' : 'sign-out-alt' ?>"></i>
+                                                <?= strtoupper(str_replace('_', ' ', $log['access_type'])) ?>
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if (!empty($log['access_result'])): ?>
+                                            <span class="badge badge-<?= $log['access_result'] === 'granted' ? 'granted' : 'denied' ?>">
+                                                <i class="fas fa-<?= $log['access_result'] === 'granted' ? 'check' : 'times' ?>"></i>
+                                                <?= ucfirst($log['access_result']) ?>
+                                            </span>
+                                            <?php if ($log['denial_reason']): ?>
+                                                <br><small class="text-muted"><?= htmlspecialchars($log['denial_reason']) ?></small>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
@@ -199,7 +214,7 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
                                 
                                 <?php if (mysqli_num_rows($logsResult) === 0): ?>
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">
+                                    <td colspan="8" class="text-center text-muted py-4">
                                         <i class="fas fa-inbox fa-2x mb-2"></i><br>
                                         No access logs found
                                     </td>
@@ -274,32 +289,50 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
             const tbody = document.querySelector('#logsTableBody');
             
             // Check if tbody has any rows with "No access logs found" message
-            const noDataRow = tbody.querySelector('td[colspan="7"]');
+            const noDataRow = tbody.querySelector('td[colspan="8"]');
             if (noDataRow) {
                 tbody.innerHTML = ''; // Clear the "no data" message
             }
             
             const newRow = document.createElement('tr');
-            newRow.className = 'table-success'; // Highlight new entry
+            newRow.className = 'animate-new-row'; // Only animation class
             
             const badgeClass = data.access_result === 'granted' ? 'badge-granted' : 'badge-denied';
             const icon = data.access_result === 'granted' ? 'check' : 'times';
             
+            // Access type badge
+            let accessTypeBadge = '<span class="text-muted">-</span>';
+            if (data.access_type) {
+                const accessTypeClass = data.access_type === 'time_in' ? 'badge-info' : 'badge-warning';
+                const accessTypeIcon = data.access_type === 'time_in' ? 'sign-in-alt' : 'sign-out-alt';
+                const accessTypeText = data.access_type.replace('_', ' ').toUpperCase();
+                accessTypeBadge = `<span class="badge ${accessTypeClass}"><i class="fas fa-${accessTypeIcon}"></i> ${accessTypeText}</span>`;
+            }
+            
+            const dateObj = new Date(data.timestamp);
+            const dateStr = dateObj.toLocaleDateString('en-US', {
+                timeZone: 'Asia/Manila',
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit'
+            });
+            const timeStr = dateObj.toLocaleTimeString('en-US', {
+                timeZone: 'Asia/Manila',
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+            
             newRow.innerHTML = `
-                <td><small>${new Date(data.timestamp).toLocaleString('en-US', {
-                    timeZone: 'Asia/Manila',
-                    year: 'numeric',
-                    month: 'short',
-                    day: '2-digit',
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: true
-                })}</small></td>
+                <td>
+                    <small>${dateStr}<br>${timeStr}</small>
+                </td>
                 <td><code>${data.rfid_id}</code></td>
                 <td>${data.full_name || 'Unknown'}</td>
                 <td>${data.role ? '<span class="badge badge-secondary">' + data.role.charAt(0).toUpperCase() + data.role.slice(1) + '</span>' : '<span class="text-muted">-</span>'}</td>
                 <td>${data.plate_number || '-'}</td>
+                <td>${accessTypeBadge}</td>
                 <td>
                     <span class="badge ${badgeClass}">
                         <i class="fas fa-${icon}"></i> ${data.access_result.charAt(0).toUpperCase() + data.access_result.slice(1)}
@@ -314,7 +347,7 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
             
             // Remove highlight after 3 seconds
             setTimeout(() => {
-                newRow.classList.remove('table-success');
+                newRow.classList.remove('animate-new-row');
             }, 3000);
             
             // Maintain only 50 rows - remove from bottom when exceeding limit

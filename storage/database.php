@@ -8,7 +8,7 @@
 $host = "localhost";
 $user = "root";
 $pass = "";
-$dbname = "gate_security_db";
+$dbname = "gate_security_fresh_db";
 
 // Global connection variable
 $conn = null;
@@ -24,24 +24,22 @@ function initializeDatabase() {
     
     while ($retryCount < $maxRetries) {
         try {
-            // Create database if it doesn't exist
-            $tempConn = mysqli_connect($host, $user, $pass);
-            if (!$tempConn) {
+            // Connect to MySQL server first
+            $conn = @mysqli_connect($host, $user, $pass);
+            
+            if (!$conn) {
                 throw new Exception("Failed to connect to MySQL server: " . mysqli_connect_error());
             }
             
-            // Create database
+            // Create database if it doesn't exist
             $createDbQuery = "CREATE DATABASE IF NOT EXISTS `$dbname` CHARACTER SET utf8 COLLATE utf8_general_ci";
-            if (!mysqli_query($tempConn, $createDbQuery)) {
-                error_log("Warning: Could not create database: " . mysqli_error($tempConn));
+            if (!@mysqli_query($conn, $createDbQuery)) {
+                error_log("Warning: Could not create database: " . mysqli_error($conn));
             }
-            mysqli_close($tempConn);
             
-            // Connect to the specific database
-            $conn = mysqli_connect($host, $user, $pass, $dbname);
-            
-            if (!$conn) {
-                throw new Exception("Connection failed: " . mysqli_connect_error());
+            // Select the database
+            if (!@mysqli_select_db($conn, $dbname)) {
+                throw new Exception("Failed to select database: " . mysqli_error($conn));
             }
             
             // Set character set
@@ -60,7 +58,9 @@ function initializeDatabase() {
             error_log("Database connection attempt $retryCount failed: " . $e->getMessage());
             
             if ($retryCount >= $maxRetries) {
-                die("Database connection failed after $maxRetries attempts. Please check your database configuration.");
+                // Don't die, just log and return false
+                error_log("Database connection failed after $maxRetries attempts");
+                return false;
             }
             
             sleep(1); // Wait 1 second before retry
@@ -76,9 +76,18 @@ function initializeDatabase() {
 function createTables() {
     global $conn;
     
+    // Check if tables already exist
+    $checkQuery = "SHOW TABLES LIKE 'admins'";
+    $result = @mysqli_query($conn, $checkQuery);
+    
+    if ($result && mysqli_num_rows($result) > 0) {
+        // Tables already exist, skip creation
+        return true;
+    }
+    
     $tables = [
         // Admins table
-        "CREATE TABLE IF NOT EXISTS admins (
+        "CREATE TABLE admins (
             id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             username VARCHAR(50) NOT NULL UNIQUE,
             password VARCHAR(255) NOT NULL,
@@ -92,7 +101,7 @@ function createTables() {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8",
         
         // RFID Cards table
-        "CREATE TABLE IF NOT EXISTS rfid_cards (
+        "CREATE TABLE rfid_cards (
             id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             rfid_id VARCHAR(50) NOT NULL UNIQUE,
             full_name VARCHAR(100) NOT NULL,
@@ -108,24 +117,26 @@ function createTables() {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8",
         
         // Access Logs table
-        "CREATE TABLE IF NOT EXISTS access_logs (
+        "CREATE TABLE access_logs (
             id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             rfid_id VARCHAR(50) NOT NULL,
             card_id INT(11) UNSIGNED NULL,
             full_name VARCHAR(100) NULL,
             access_result ENUM('granted', 'denied') NOT NULL,
             denial_reason VARCHAR(100) NULL,
+            access_type ENUM('time_in', 'time_out') NULL,
             gate_location VARCHAR(50) DEFAULT 'main_gate',
             access_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             ip_address VARCHAR(45) NULL,
             INDEX idx_rfid_timestamp (rfid_id, access_timestamp),
             INDEX idx_timestamp (access_timestamp),
             INDEX idx_result (access_result),
+            INDEX idx_access_type (access_type),
             FOREIGN KEY (card_id) REFERENCES rfid_cards(id) ON DELETE SET NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8",
         
         // System Settings table
-        "CREATE TABLE IF NOT EXISTS system_settings (
+        "CREATE TABLE system_settings (
             id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             setting_key VARCHAR(50) NOT NULL UNIQUE,
             setting_value TEXT NOT NULL,
@@ -133,15 +144,31 @@ function createTables() {
             updated_by INT(11) UNSIGNED,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (updated_by) REFERENCES admins(id) ON DELETE SET NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8",
+        
+        // RFID Scan Timeout table
+        "CREATE TABLE rfid_scan_timeouts (
+            id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            rfid_id VARCHAR(50) NOT NULL,
+            last_scan_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            timeout_until TIMESTAMP NULL,
+            scan_count INT(3) DEFAULT 1,
+            current_status ENUM('in', 'out') DEFAULT 'out',
+            gate_location VARCHAR(50) DEFAULT 'main_gate',
+            INDEX idx_rfid_timeout (rfid_id, timeout_until),
+            INDEX idx_timeout_until (timeout_until),
+            INDEX idx_rfid_status (rfid_id, current_status)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8"
     ];
     
     foreach ($tables as $tableQuery) {
-        if (!mysqli_query($conn, $tableQuery)) {
+        if (!@mysqli_query($conn, $tableQuery)) {
             error_log("Error creating table: " . mysqli_error($conn));
-            throw new Exception("Failed to create database tables: " . mysqli_error($conn));
+            // Don't throw exception, just log and continue
         }
     }
+    
+    return true;
 }
 
 /**
@@ -157,7 +184,10 @@ function insertDefaultSettings() {
         ['gate_open_duration', '10', 'Gate open duration in seconds'],
         ['system_name', 'Holy Family High School Gate Security', 'System name for display'],
         ['log_retention_days', '180', 'Number of days to retain access logs'],
-        ['enable_alerts', '1', 'Enable security alerts (1=enabled, 0=disabled)']
+        ['enable_alerts', '1', 'Enable security alerts (1=enabled, 0=disabled)'],
+        ['rfid_scan_timeout', '30', 'RFID scan timeout in seconds (prevents rapid re-scanning)'],
+        ['rfid_max_scans_before_timeout', '3', 'Maximum scans before timeout is applied'],
+        ['rfid_timeout_duration', '300', 'RFID timeout duration in seconds (5 minutes)']
     ];
     
     foreach ($defaultSettings as $setting) {
@@ -263,7 +293,9 @@ function executeQuery($query, $params = [], $types = '') {
 
 // Initialize database on include
 try {
-    initializeDatabase();
+    if (!initializeDatabase()) {
+        error_log("Database initialization failed - check logs");
+    }
     createDefaultAdmin();
 } catch (Exception $e) {
     error_log("Database initialization error: " . $e->getMessage());

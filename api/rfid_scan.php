@@ -116,6 +116,91 @@ try {
     }
     Logger::debug("Database connection established");
     
+    // Get timeout settings
+    $timeoutSettings = [];
+    $settingsQuery = "SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('rfid_scan_timeout', 'rfid_max_scans_before_timeout', 'rfid_timeout_duration')";
+    $settingsResult = mysqli_query($conn, $settingsQuery);
+    while ($setting = mysqli_fetch_assoc($settingsResult)) {
+        $timeoutSettings[$setting['setting_key']] = (int)$setting['setting_value'];
+    }
+    
+    // Set default values if not found
+    $scanTimeout = $timeoutSettings['rfid_scan_timeout'] ?? 30;
+    $maxScansBeforeTimeout = $timeoutSettings['rfid_max_scans_before_timeout'] ?? 3;
+    $timeoutDuration = $timeoutSettings['rfid_timeout_duration'] ?? 300;
+    
+    Logger::debug("Timeout settings loaded", $timeoutSettings);
+    
+    // Check for existing timeout
+    $timeoutCheckQuery = "SELECT * FROM rfid_scan_timeouts WHERE rfid_id = ? AND gate_location = ? ORDER BY last_scan_time DESC LIMIT 1";
+    $timeoutStmt = mysqli_prepare($conn, $timeoutCheckQuery);
+    mysqli_stmt_bind_param($timeoutStmt, "ss", $rfidId, $gateLocation);
+    mysqli_stmt_execute($timeoutStmt);
+    $timeoutResult = mysqli_stmt_get_result($timeoutStmt);
+    $timeoutData = mysqli_fetch_assoc($timeoutResult);
+    mysqli_stmt_close($timeoutStmt);
+    
+    $currentTime = time();
+    $isInTimeout = false;
+    $timeoutReason = null;
+    $accessType = 'time_in'; // Default to time_in
+    
+    if ($timeoutData) {
+        // Determine access type based on current status
+        $accessType = ($timeoutData['current_status'] === 'out') ? 'time_in' : 'time_out';
+        
+        // Use MySQL to calculate time difference (handles timezone issues)
+        $timeDiffQuery = "SELECT TIMESTAMPDIFF(SECOND, ?, NOW()) as seconds_passed";
+        $timeDiffStmt = mysqli_prepare($conn, $timeDiffQuery);
+        mysqli_stmt_bind_param($timeDiffStmt, "s", $timeoutData['last_scan_time']);
+        mysqli_stmt_execute($timeDiffStmt);
+        $timeDiffResult = mysqli_stmt_get_result($timeDiffStmt);
+        $timeDiffRow = mysqli_fetch_assoc($timeDiffResult);
+        $timeSinceLastScan = (int)$timeDiffRow['seconds_passed'];
+        mysqli_stmt_close($timeDiffStmt);
+        
+        Logger::debug("Timeout check", [
+            'last_scan_time' => $timeoutData['last_scan_time'],
+            'seconds_passed' => $timeSinceLastScan,
+            'scan_timeout' => $scanTimeout
+        ]);
+        
+        // Simple check: Has 30 seconds passed?
+        if ($timeSinceLastScan < $scanTimeout) {
+            // Not enough time has passed
+            $remainingWait = (int)($scanTimeout - $timeSinceLastScan);
+            $timeoutReason = "Please wait " . $remainingWait . " seconds before scanning again";
+            $isInTimeout = true;
+        } else {
+            // Enough time passed - allow scan and toggle status
+            $newStatus = ($timeoutData['current_status'] === 'out') ? 'in' : 'out';
+            $resetTimeoutQuery = "UPDATE rfid_scan_timeouts SET current_status = ?, last_scan_time = NOW() WHERE id = ?";
+            $resetStmt = mysqli_prepare($conn, $resetTimeoutQuery);
+            mysqli_stmt_bind_param($resetStmt, "si", $newStatus, $timeoutData['id']);
+            mysqli_stmt_execute($resetStmt);
+            mysqli_stmt_close($resetStmt);
+        }
+    } else {
+        // First scan for this card/location - create timeout record with 'in' status
+        $insertTimeoutQuery = "INSERT INTO rfid_scan_timeouts (rfid_id, gate_location, current_status, last_scan_time) VALUES (?, ?, 'in', NOW())";
+        $insertStmt = mysqli_prepare($conn, $insertTimeoutQuery);
+        mysqli_stmt_bind_param($insertStmt, "ss", $rfidId, $gateLocation);
+        mysqli_stmt_execute($insertStmt);
+        mysqli_stmt_close($insertStmt);
+        $accessType = 'time_in';
+    }
+    
+    // If in timeout, return error WITHOUT logging or broadcasting
+    if ($isInTimeout) {
+        // Just return error response, don't log, don't broadcast
+        echo json_encode([
+            'success' => false,
+            'message' => $timeoutReason,
+            'is_timeout' => true
+        ]);
+        exit;
+    }
+    
     // Check if RFID card exists and is active
     $cardQuery = "SELECT * FROM rfid_cards WHERE rfid_id = ?";
     $cardStmt = mysqli_prepare($conn, $cardQuery);
@@ -123,7 +208,7 @@ try {
     mysqli_stmt_execute($cardStmt);
     $cardResult = mysqli_stmt_get_result($cardStmt);
     
-    $accessResult = 'denied';
+    $accessResult = 'denied'; // Default to denied
     $denialReason = null;
     $cardData = null;
     
@@ -131,27 +216,57 @@ try {
         $cardData = $cardRow;
         
         if ($cardRow['status'] === 'active') {
-            $accessResult = 'granted';
+            $accessResult = 'granted'; // Explicitly set to granted
+            $denialReason = null;
         } else {
-            $accessResult = 'denied';
+            $accessResult = 'denied'; // Explicitly set to denied
             $denialReason = 'Card is ' . $cardRow['status'];
         }
     } else {
+        $accessResult = 'denied'; // Explicitly set to denied
         $denialReason = 'Card not found in system';
     }
     
     mysqli_stmt_close($cardStmt);
     
+    // ENSURE access_result is never empty
+    if (empty($accessResult)) {
+        $accessResult = 'denied';
+        $denialReason = 'Unknown error';
+    }
+    
+    Logger::debug("Access decision", [
+        'rfid_id' => $rfidId,
+        'access_result' => $accessResult,
+        'denial_reason' => $denialReason,
+        'access_type' => $accessType
+    ]);
+    
     // Log the access attempt
-    $logQuery = "INSERT INTO access_logs (rfid_id, card_id, full_name, access_result, denial_reason, gate_location, ip_address) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $logQuery = "INSERT INTO access_logs (rfid_id, card_id, full_name, access_result, denial_reason, access_type, gate_location, ip_address) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $logStmt = mysqli_prepare($conn, $logQuery);
     
     $cardId = $cardData ? $cardData['id'] : null;
     $fullName = $cardData ? $cardData['full_name'] : 'Unknown';
     $ipAddress = $_SERVER['REMOTE_ADDR'] ?? null;
     
-    mysqli_stmt_bind_param($logStmt, "sisssss", $rfidId, $cardId, $fullName, $accessResult, $denialReason, $gateLocation, $ipAddress);
-    mysqli_stmt_execute($logStmt);
+    // Log what we're about to insert
+    Logger::debug("Inserting to database", [
+        'rfid_id' => $rfidId,
+        'card_id' => $cardId,
+        'full_name' => $fullName,
+        'access_result' => $accessResult,
+        'denial_reason' => $denialReason,
+        'access_type' => $accessType,
+        'gate_location' => $gateLocation
+    ]);
+    
+    mysqli_stmt_bind_param($logStmt, "sissssss", $rfidId, $cardId, $fullName, $accessResult, $denialReason, $accessType, $gateLocation, $ipAddress);
+    
+    if (!mysqli_stmt_execute($logStmt)) {
+        Logger::error("Failed to insert log", ['error' => mysqli_stmt_error($logStmt)]);
+    }
+    
     $logId = mysqli_insert_id($conn);
     mysqli_stmt_close($logStmt);
     
@@ -164,6 +279,7 @@ try {
         'role' => $cardData['role'] ?? null,
         'plate_number' => $cardData['plate_number'] ?? null,
         'denial_reason' => $denialReason,
+        'access_type' => $accessType,
         'gate_location' => $gateLocation,
         'timestamp' => date('Y-m-d H:i:s'),
         'log_id' => $logId
