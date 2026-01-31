@@ -1,0 +1,200 @@
+[2026-01-31 11:07:26] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:07:26] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:07:26] [debug] Database connection established
+[2026-01-31 11:07:26] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:07:26] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 17:15:13","seconds_passed":3133,"scan_timeout":30}
+[2026-01-31 11:07:26] [debug] Access decision - Context: {"rfid_id":"123","access_result":"granted","denial_reason":null,"access_type":"time_in"}
+[2026-01-31 11:07:26] [debug] Inserting to database - Context: {"rfid_id":"123","card_id":1,"full_name":"123","access_result":"granted","denial_reason":null,"access_type":"time_in","gate_location":"main_gate"}
+[2026-01-31 11:07:27] [debug] Pusher broadcast result - Context: {"success":true}
+[2026-01-31 11:07:29] [debug] Arduino command sent - Context: {"command":"open","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2026-01-31 11:07:34] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:07:34] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:07:34] [debug] Database connection established
+[2026-01-31 11:07:34] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:07:34] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:07:26","seconds_passed":8,"scan_timeout":30}
+[2026-01-31 11:08:14] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:08:14] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:08:14] [debug] Database connection established
+[2026-01-31 11:08:14] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:08:14] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:07:26","seconds_passed":48,"scan_timeout":30}
+[2026-01-31 11:08:14] [debug] Access decision - Context: {"rfid_id":"123","access_result":"granted","denial_reason":null,"access_type":"time_out"}
+[2026-01-31 11:08:14] [debug] Inserting to database - Context: {"rfid_id":"123","card_id":1,"full_name":"123","access_result":"granted","denial_reason":null,"access_type":"time_out","gate_location":"main_gate"}
+[2026-01-31 11:08:14] [debug] Pusher broadcast result - Context: {"success":true}
+[2026-01-31 11:08:16] [debug] Arduino command sent - Context: {"command":"open","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2026-01-31 11:08:29] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:08:29] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:08:29] [debug] Database connection established
+[2026-01-31 11:08:29] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:08:29] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:08:14","seconds_passed":15,"scan_timeout":30}
+[2026-01-31 11:08:37] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:08:37] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:08:37] [debug] Database connection established
+[2026-01-31 11:08:37] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:08:37] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:08:14","seconds_passed":23,"scan_timeout":30}
+[2026-01-31 11:08:41] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:08:41] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:08:41] [debug] Database connection established
+[2026-01-31 11:08:41] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:08:41] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:08:14","seconds_passed":27,"scan_timeout":30}
+[2026-01-31 11:08:45] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:08:45] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:08:45] [debug] Database connection established
+[2026-01-31 11:08:45] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:08:45] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:08:14","seconds_passed":31,"scan_timeout":30}
+[2026-01-31 11:08:45] [debug] Access decision - Context: {"rfid_id":"123","access_result":"granted","denial_reason":null,"access_type":"time_in"}
+[2026-01-31 11:08:45] [debug] Inserting to database - Context: {"rfid_id":"123","card_id":1,"full_name":"123","access_result":"granted","denial_reason":null,"access_type":"time_in","gate_location":"main_gate"}
+[2026-01-31 11:08:46] [debug] Pusher broadcast result - Context: {"success":true}
+[2026-01-31 11:08:48] [debug] Arduino command sent - Context: {"command":"open","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2026-01-31 11:44:58] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"1234\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:44:58] [debug] Parsed input - Context: {"rfid_id":"1234","gate_location":"main_gate"}
+[2026-01-31 11:44:58] [debug] Database connection established
+[2026-01-31 11:44:58] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:44:58] [debug] Access decision - Context: {"rfid_id":"1234","access_result":"granted","denial_reason":null,"access_type":"time_in"}
+[2026-01-31 11:44:58] [debug] Inserting to database - Context: {"rfid_id":"1234","card_id":2,"full_name":"1234","access_result":"granted","denial_reason":null,"access_type":"time_in","gate_location":"main_gate"}
+[2026-01-31 11:44:59] [debug] Pusher broadcast result - Context: {"success":true}
+[2026-01-31 11:45:01] [debug] Arduino command sent - Context: {"command":"open","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2026-01-31 11:45:04] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:45:04] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:45:04] [debug] Database connection established
+[2026-01-31 11:45:04] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:45:04] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:08:45","seconds_passed":2179,"scan_timeout":30}
+[2026-01-31 11:45:04] [debug] Access decision - Context: {"rfid_id":"123","access_result":"granted","denial_reason":null,"access_type":"time_out"}
+[2026-01-31 11:45:04] [debug] Inserting to database - Context: {"rfid_id":"123","card_id":1,"full_name":"123","access_result":"granted","denial_reason":null,"access_type":"time_out","gate_location":"main_gate"}
+[2026-01-31 11:45:06] [debug] Pusher broadcast result - Context: {"success":true}
+[2026-01-31 11:45:08] [debug] Arduino command sent - Context: {"command":"open","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2026-01-31 11:45:11] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"1234\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:45:11] [debug] Parsed input - Context: {"rfid_id":"1234","gate_location":"main_gate"}
+[2026-01-31 11:45:11] [debug] Database connection established
+[2026-01-31 11:45:11] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:45:11] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:44:58","seconds_passed":13,"scan_timeout":30}
+[2026-01-31 11:45:14] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:45:14] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:45:14] [debug] Database connection established
+[2026-01-31 11:45:14] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:45:14] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:45:04","seconds_passed":10,"scan_timeout":30}
+[2026-01-31 11:45:16] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"1234\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:45:16] [debug] Parsed input - Context: {"rfid_id":"1234","gate_location":"main_gate"}
+[2026-01-31 11:45:16] [debug] Database connection established
+[2026-01-31 11:45:16] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:45:16] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:44:58","seconds_passed":18,"scan_timeout":30}
+[2026-01-31 11:45:20] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:45:20] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:45:20] [debug] Database connection established
+[2026-01-31 11:45:20] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:45:20] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:45:04","seconds_passed":16,"scan_timeout":30}
+[2026-01-31 11:45:23] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"2134\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:45:23] [debug] Parsed input - Context: {"rfid_id":"2134","gate_location":"main_gate"}
+[2026-01-31 11:45:23] [debug] Database connection established
+[2026-01-31 11:45:23] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:45:23] [debug] Access decision - Context: {"rfid_id":"2134","access_result":"denied","denial_reason":"Card not found in system","access_type":"time_in"}
+[2026-01-31 11:45:23] [debug] Inserting to database - Context: {"rfid_id":"2134","card_id":null,"full_name":"Unknown","access_result":"denied","denial_reason":"Card not found in system","access_type":"time_in","gate_location":"main_gate"}
+[2026-01-31 11:45:24] [debug] Pusher broadcast result - Context: {"success":true}
+[2026-01-31 11:45:26] [debug] Arduino command sent - Context: {"command":"unauthorized","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2026-01-31 11:45:33] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"1234\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:45:33] [debug] Parsed input - Context: {"rfid_id":"1234","gate_location":"main_gate"}
+[2026-01-31 11:45:33] [debug] Database connection established
+[2026-01-31 11:45:33] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:45:33] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:44:58","seconds_passed":35,"scan_timeout":30}
+[2026-01-31 11:45:33] [debug] Access decision - Context: {"rfid_id":"1234","access_result":"granted","denial_reason":null,"access_type":"time_out"}
+[2026-01-31 11:45:33] [debug] Inserting to database - Context: {"rfid_id":"1234","card_id":2,"full_name":"1234","access_result":"granted","denial_reason":null,"access_type":"time_out","gate_location":"main_gate"}
+[2026-01-31 11:45:34] [debug] Pusher broadcast result - Context: {"success":true}
+[2026-01-31 11:45:36] [debug] Arduino command sent - Context: {"command":"open","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2026-01-31 11:45:40] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:45:40] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:45:40] [debug] Database connection established
+[2026-01-31 11:45:40] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:45:40] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:45:04","seconds_passed":36,"scan_timeout":30}
+[2026-01-31 11:45:40] [debug] Access decision - Context: {"rfid_id":"123","access_result":"granted","denial_reason":null,"access_type":"time_in"}
+[2026-01-31 11:45:40] [debug] Inserting to database - Context: {"rfid_id":"123","card_id":1,"full_name":"123","access_result":"granted","denial_reason":null,"access_type":"time_in","gate_location":"main_gate"}
+[2026-01-31 11:45:40] [debug] Pusher broadcast result - Context: {"success":true}
+[2026-01-31 11:45:42] [debug] Arduino command sent - Context: {"command":"open","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2026-01-31 11:48:59] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:48:59] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:48:59] [debug] Database connection established
+[2026-01-31 11:48:59] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:48:59] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:45:40","seconds_passed":199,"scan_timeout":30}
+[2026-01-31 11:48:59] [debug] Access decision - Context: {"rfid_id":"123","access_result":"granted","denial_reason":null,"access_type":"time_out"}
+[2026-01-31 11:48:59] [debug] Inserting to database - Context: {"rfid_id":"123","card_id":1,"full_name":"123","access_result":"granted","denial_reason":null,"access_type":"time_out","gate_location":"main_gate"}
+[2026-01-31 11:48:59] [debug] Pusher broadcast result - Context: {"success":true}
+[2026-01-31 11:49:01] [debug] Arduino command sent - Context: {"command":"open","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2026-01-31 11:49:07] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:49:07] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:49:07] [debug] Database connection established
+[2026-01-31 11:49:07] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:49:07] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:48:59","seconds_passed":8,"scan_timeout":30}
+[2026-01-31 11:49:12] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"1234\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:49:12] [debug] Parsed input - Context: {"rfid_id":"1234","gate_location":"main_gate"}
+[2026-01-31 11:49:12] [debug] Database connection established
+[2026-01-31 11:49:12] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:49:12] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:45:33","seconds_passed":219,"scan_timeout":30}
+[2026-01-31 11:49:12] [debug] Access decision - Context: {"rfid_id":"1234","access_result":"granted","denial_reason":null,"access_type":"time_in"}
+[2026-01-31 11:49:12] [debug] Inserting to database - Context: {"rfid_id":"1234","card_id":2,"full_name":"1234","access_result":"granted","denial_reason":null,"access_type":"time_in","gate_location":"main_gate"}
+[2026-01-31 11:49:13] [debug] Pusher broadcast result - Context: {"success":true}
+[2026-01-31 11:49:15] [debug] Arduino command sent - Context: {"command":"open","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2026-01-31 11:49:22] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"1234\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:49:22] [debug] Parsed input - Context: {"rfid_id":"1234","gate_location":"main_gate"}
+[2026-01-31 11:49:22] [debug] Database connection established
+[2026-01-31 11:49:22] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:49:22] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:49:12","seconds_passed":10,"scan_timeout":30}
+[2026-01-31 11:49:29] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"1234\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:49:29] [debug] Parsed input - Context: {"rfid_id":"1234","gate_location":"main_gate"}
+[2026-01-31 11:49:29] [debug] Database connection established
+[2026-01-31 11:49:29] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:49:29] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:49:12","seconds_passed":17,"scan_timeout":30}
+[2026-01-31 11:49:33] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"1234\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:49:33] [debug] Parsed input - Context: {"rfid_id":"1234","gate_location":"main_gate"}
+[2026-01-31 11:49:33] [debug] Database connection established
+[2026-01-31 11:49:33] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:49:33] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:49:12","seconds_passed":21,"scan_timeout":30}
+[2026-01-31 11:49:39] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:49:39] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:49:39] [debug] Database connection established
+[2026-01-31 11:49:39] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:49:39] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:48:59","seconds_passed":40,"scan_timeout":30}
+[2026-01-31 11:49:39] [debug] Access decision - Context: {"rfid_id":"123","access_result":"granted","denial_reason":null,"access_type":"time_in"}
+[2026-01-31 11:49:39] [debug] Inserting to database - Context: {"rfid_id":"123","card_id":1,"full_name":"123","access_result":"granted","denial_reason":null,"access_type":"time_in","gate_location":"main_gate"}
+[2026-01-31 11:49:40] [debug] Pusher broadcast result - Context: {"success":true}
+[2026-01-31 11:49:42] [debug] Arduino command sent - Context: {"command":"open","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2026-01-31 11:49:45] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"1234\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:49:45] [debug] Parsed input - Context: {"rfid_id":"1234","gate_location":"main_gate"}
+[2026-01-31 11:49:45] [debug] Database connection established
+[2026-01-31 11:49:45] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:49:45] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:49:12","seconds_passed":33,"scan_timeout":30}
+[2026-01-31 11:49:45] [debug] Access decision - Context: {"rfid_id":"1234","access_result":"granted","denial_reason":null,"access_type":"time_out"}
+[2026-01-31 11:49:45] [debug] Inserting to database - Context: {"rfid_id":"1234","card_id":2,"full_name":"1234","access_result":"granted","denial_reason":null,"access_type":"time_out","gate_location":"main_gate"}
+[2026-01-31 11:49:46] [debug] Pusher broadcast result - Context: {"success":true}
+[2026-01-31 11:49:48] [debug] Arduino command sent - Context: {"command":"open","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}
+[2026-01-31 11:49:51] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:49:51] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:49:51] [debug] Database connection established
+[2026-01-31 11:49:51] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:49:51] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:49:39","seconds_passed":12,"scan_timeout":30}
+[2026-01-31 11:49:54] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:49:54] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:49:54] [debug] Database connection established
+[2026-01-31 11:49:54] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:49:54] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:49:39","seconds_passed":15,"scan_timeout":30}
+[2026-01-31 11:49:58] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:49:58] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:49:58] [debug] Database connection established
+[2026-01-31 11:49:58] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:49:58] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:49:39","seconds_passed":19,"scan_timeout":30}
+[2026-01-31 11:50:00] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:50:00] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:50:00] [debug] Database connection established
+[2026-01-31 11:50:00] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:50:00] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:49:39","seconds_passed":21,"scan_timeout":30}
+[2026-01-31 11:50:06] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:50:06] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:50:06] [debug] Database connection established
+[2026-01-31 11:50:06] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:50:06] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:49:39","seconds_passed":27,"scan_timeout":30}
+[2026-01-31 11:50:11] [debug] Raw input received - Context: {"input":"{\"rfid_id\":\"123\",\"gate_location\":\"main_gate\"}"}
+[2026-01-31 11:50:11] [debug] Parsed input - Context: {"rfid_id":"123","gate_location":"main_gate"}
+[2026-01-31 11:50:11] [debug] Database connection established
+[2026-01-31 11:50:11] [debug] Timeout settings loaded - Context: {"rfid_scan_timeout":30,"rfid_max_scans_before_timeout":3,"rfid_timeout_duration":30}
+[2026-01-31 11:50:11] [debug] Timeout check - Context: {"last_scan_time":"2026-01-31 18:49:39","seconds_passed":32,"scan_timeout":30}
+[2026-01-31 11:50:11] [debug] Access decision - Context: {"rfid_id":"123","access_result":"granted","denial_reason":null,"access_type":"time_out"}
+[2026-01-31 11:50:11] [debug] Inserting to database - Context: {"rfid_id":"123","card_id":1,"full_name":"123","access_result":"granted","denial_reason":null,"access_type":"time_out","gate_location":"main_gate"}
+[2026-01-31 11:50:13] [debug] Pusher broadcast result - Context: {"success":true}
+[2026-01-31 11:50:15] [debug] Arduino command sent - Context: {"command":"open","response":{"status":"error","message":"Arduino communication failed: Failed to connect to Python bridge"}}

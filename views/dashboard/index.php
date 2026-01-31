@@ -187,7 +187,7 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
                                         <?php if ($log['access_type']): ?>
                                             <span class="badge badge-<?= $log['access_type'] === 'time_in' ? 'info' : 'warning' ?>">
                                                 <i class="fas fa-<?= $log['access_type'] === 'time_in' ? 'sign-in-alt' : 'sign-out-alt' ?>"></i>
-                                                <?= strtoupper(str_replace('_', ' ', $log['access_type'])) ?>
+                                                <?= $log['access_type'] === 'time_in' ? 'ENTRY' : 'EXIT' ?>
                                             </span>
                                         <?php else: ?>
                                             <span class="text-muted">-</span>
@@ -305,7 +305,7 @@ $cardsStats = mysqli_fetch_assoc($cardsResult);
             if (data.access_type) {
                 const accessTypeClass = data.access_type === 'time_in' ? 'badge-info' : 'badge-warning';
                 const accessTypeIcon = data.access_type === 'time_in' ? 'sign-in-alt' : 'sign-out-alt';
-                const accessTypeText = data.access_type.replace('_', ' ').toUpperCase();
+                const accessTypeText = data.access_type === 'time_in' ? 'ENTRY' : 'EXIT';
                 accessTypeBadge = `<span class="badge ${accessTypeClass}"><i class="fas fa-${accessTypeIcon}"></i> ${accessTypeText}</span>`;
             }
             

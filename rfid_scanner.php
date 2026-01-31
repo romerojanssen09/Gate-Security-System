@@ -506,7 +506,7 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
                                 <i class="fas fa-id-card"></i>
                             </div>
                             <div id="statusText" class="status-text">
-                                Waiting for RFID card...
+                                Ready to scan card
                             </div>
                         </div>
 
@@ -690,7 +690,7 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
             
             display.classList.add('checking');
             icon.innerHTML = '<i class="fas fa-cog"></i>';
-            text.textContent = command === 'manualopen' ? 'Opening gate manually...' : 'Closing gate manually...';
+            text.textContent = command === 'manualopen' ? 'Opening gate...' : 'Closing gate...';
             
             // Send command via PHP proxy to avoid CORS issues
             fetch('api/manual_control.php', {
@@ -715,7 +715,7 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
                     // Show success state
                     display.classList.remove('checking');
                     icon.innerHTML = '<i class="fas fa-check-circle"></i>';
-                    text.innerHTML = `<strong>MANUAL CONTROL</strong><br>${command === 'manualopen' ? 'Gate Opened' : 'Gate Closed'}`;
+                    text.innerHTML = `<strong>MANUAL OVERRIDE</strong><br>${command === 'manualopen' ? 'Gate opened' : 'Gate closed'}`;
                     display.style.background = command === 'manualopen' ? 
                         'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)' : 
                         'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)';
@@ -729,7 +729,7 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
                     // Show error from server
                     display.classList.remove('checking');
                     icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
-                    text.textContent = 'Error: ' + (data.message || 'Unknown error occurred');
+                    text.textContent = 'Error: ' + (data.message || 'Operation failed');
                     display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
                     
                     // Reset after 3 seconds
@@ -745,7 +745,7 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
                 // Show error state
                 display.classList.remove('checking');
                 icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
-                text.textContent = 'Connection failed. Check if Python bridge is running.';
+                text.textContent = 'Connection error. Please try again.';
                 display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
                 
                 // Reset after 3 seconds
@@ -814,7 +814,7 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
             
             display.classList.add('checking');
             icon.innerHTML = '<i class="fas fa-spinner"></i>';
-            text.textContent = 'Checking card data...';
+            text.textContent = 'Verifying card...';
         }
         
         function showWaitingState() {
@@ -822,9 +822,15 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
             const icon = document.getElementById('statusIcon');
             const text = document.getElementById('statusText');
             
-            display.classList.remove('checking');
+            // Clear any existing countdown
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            
+            display.classList.remove('checking', 'timeout');
             icon.innerHTML = '<i class="fas fa-id-card"></i>';
-            text.textContent = 'Waiting for RFID card...';
+            text.textContent = 'Ready to scan card';
         }
         
         function showErrorState() {
@@ -834,27 +840,74 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
             
             display.classList.remove('checking');
             icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
-            text.textContent = 'Error occurred. Please try again.';
+            text.textContent = 'Connection error. Please try again.';
             
             setTimeout(() => {
                 showWaitingState();
             }, 3000);
         }
         
+        let countdownInterval = null;
+        
         function showTimeoutState(message) {
             const display = document.getElementById('rfidDisplay');
             const icon = document.getElementById('statusIcon');
             const text = document.getElementById('statusText');
             
+            // Clear any existing countdown
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            
             display.classList.remove('checking');
+            display.classList.add('timeout');
             icon.innerHTML = '<i class="fas fa-clock"></i>';
-            text.innerHTML = `<strong>PLEASE WAIT</strong><br>${message}`;
+            
+            // Extract seconds from message
+            const secondsMatch = message.match(/(\d+)\s+seconds?/);
+            if (secondsMatch) {
+                let remainingSeconds = parseInt(secondsMatch[1]);
+                
+                // Update display with countdown
+                const updateCountdown = () => {
+                    if (remainingSeconds > 0) {
+                        text.innerHTML = `<strong>GATE COOLDOWN</strong><br>Please wait <span style="font-size: 1.5em; font-weight: bold;">${remainingSeconds}</span> second${remainingSeconds !== 1 ? 's' : ''}`;
+                        remainingSeconds--;
+                    } else {
+                        // Countdown finished
+                        if (countdownInterval) {
+                            clearInterval(countdownInterval);
+                            countdownInterval = null;
+                        }
+                        text.innerHTML = `<strong>READY</strong><br>You can scan now`;
+                        setTimeout(() => {
+                            showWaitingState();
+                            display.style.background = '';
+                        }, 1000);
+                    }
+                };
+                
+                // Initial display
+                updateCountdown();
+                
+                // Update every second
+                countdownInterval = setInterval(updateCountdown, 1000);
+            } else {
+                text.innerHTML = `<strong>GATE COOLDOWN</strong><br>${message}`;
+            }
+            
             display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
             
+            // Extended display time (5 seconds or until countdown finishes)
             setTimeout(() => {
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                }
                 showWaitingState();
                 display.style.background = '';
-            }, 3000);
+            }, 5000);
         }
         
         function displayResult(data) {
@@ -862,18 +915,76 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
             const icon = document.getElementById('statusIcon');
             const text = document.getElementById('statusText');
             
+            // Clear any existing countdown
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            
             display.classList.remove('checking');
             
             if (data.success) {
                 if (data.access_result === 'granted') {
-                    icon.innerHTML = '<i class="fas fa-check-circle"></i>';
-                    text.innerHTML = `<strong>ACCESS GRANTED</strong><br>${data.full_name || 'Unknown'}`;
+                    // Show ENTRY or EXIT based on access_type
+                    const actionText = data.access_type === 'time_in' ? 'ENTRY GRANTED' : 'EXIT GRANTED';
+                    const actionIcon = data.access_type === 'time_in' ? 'sign-in-alt' : 'sign-out-alt';
+                    
+                    icon.innerHTML = `<i class="fas fa-${actionIcon}"></i>`;
+                    text.innerHTML = `<strong>${actionText}</strong><br>${data.full_name || 'Unknown'}<br><small>${data.plate_number || ''}</small>`;
                     display.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
                 } else if (data.is_timeout) {
-                    // Special handling for timeout
+                    // Special handling for timeout with countdown
                     display.classList.add('timeout');
                     icon.innerHTML = '<i class="fas fa-clock"></i>';
-                    text.innerHTML = `<strong>SCAN TIMEOUT</strong><br>${data.denial_reason}`;
+                    
+                    // Extract seconds from denial_reason
+                    const secondsMatch = data.denial_reason.match(/(\d+)\s+seconds?/);
+                    if (secondsMatch) {
+                        let remainingSeconds = parseInt(secondsMatch[1]);
+                        
+                        // Update display with countdown
+                        const updateCountdown = () => {
+                            if (remainingSeconds > 0) {
+                                text.innerHTML = `<strong>GATE COOLDOWN</strong><br>Please wait <span style="font-size: 1.5em; font-weight: bold;">${remainingSeconds}</span> second${remainingSeconds !== 1 ? 's' : ''}`;
+                                remainingSeconds--;
+                            } else {
+                                // Countdown finished
+                                if (countdownInterval) {
+                                    clearInterval(countdownInterval);
+                                    countdownInterval = null;
+                                }
+                                text.innerHTML = `<strong>READY</strong><br>You can scan now`;
+                                setTimeout(() => {
+                                    showWaitingState();
+                                    display.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                                }, 1000);
+                            }
+                        };
+                        
+                        // Initial display
+                        updateCountdown();
+                        
+                        // Update every second
+                        countdownInterval = setInterval(updateCountdown, 1000);
+                        
+                        display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
+                        
+                        // Extended display time (5 seconds or until countdown finishes)
+                        setTimeout(() => {
+                            if (countdownInterval) {
+                                clearInterval(countdownInterval);
+                                countdownInterval = null;
+                            }
+                            display.classList.remove('timeout');
+                            showWaitingState();
+                            display.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                        }, 5000);
+                        
+                        return; // Exit early to prevent the normal 3-second reset
+                    } else {
+                        text.innerHTML = `<strong>GATE COOLDOWN</strong><br>${data.denial_reason}`;
+                    }
+                    
                     display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
                     
                     // Remove timeout class after animation
@@ -882,7 +993,7 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
                     }, 2000);
                 } else {
                     icon.innerHTML = '<i class="fas fa-times-circle"></i>';
-                    text.innerHTML = `<strong>ACCESS DENIED</strong><br>${data.denial_reason || 'Unknown reason'}`;
+                    text.innerHTML = `<strong>ACCESS DENIED</strong><br>${data.denial_reason || 'Card not authorized'}`;
                     display.style.background = 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)';
                 }
             } else {
@@ -891,12 +1002,11 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
                 display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
             }
 
-            // Reset after 3 seconds (or 5 seconds for timeout to show full message)
-            const resetDelay = data.is_timeout ? 5000 : 3000;
+            // Reset after 3 seconds
             setTimeout(() => {
                 showWaitingState();
                 display.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-            }, resetDelay);
+            }, 3000);
         }
 
         // Allow Enter key to trigger manual scan

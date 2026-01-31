@@ -119,7 +119,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
         'Full Name',
         'Role',
         'Plate Number',
-        'Status',
+        'Access Type',
         'Access Result',
         'Denial Reason',
         'Gate Location'
@@ -127,13 +127,21 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
     
     // CSV Data with PHT 12-hour format
     while ($row = mysqli_fetch_assoc($exportData)) {
+        // Convert access_type to user-friendly text
+        $accessTypeText = 'N/A';
+        if ($row['access_type'] === 'time_in') {
+            $accessTypeText = 'ENTRY';
+        } elseif ($row['access_type'] === 'time_out') {
+            $accessTypeText = 'EXIT';
+        }
+        
         fputcsv($output, [
             date('M d, Y g:i:s A', strtotime($row['access_timestamp'])), // PHT 12-hour format
             $row['rfid_id'],
             $row['full_name'],
             $row['role'],
             $row['plate_number'],
-            strtoupper(str_replace('_', ' ', $row['access_type'])),
+            $accessTypeText,
             $row['access_result'],
             $row['denial_reason'],
             $row['gate_location']
@@ -346,7 +354,7 @@ if (!empty($paginationParams)) {
                                     <?php if ($log['access_type']): ?>
                                         <span class="badge badge-<?= $log['access_type'] === 'time_in' ? 'info' : 'warning' ?>">
                                             <i class="fas fa-<?= $log['access_type'] === 'time_in' ? 'sign-in-alt' : 'sign-out-alt' ?>"></i>
-                                            <?= strtoupper(str_replace('_', ' ', $log['access_type'])) ?>
+                                            <?= $log['access_type'] === 'time_in' ? 'ENTRY' : 'EXIT' ?>
                                         </span>
                                     <?php else: ?>
                                         <span class="text-muted">-</span>
@@ -505,7 +513,7 @@ if (!empty($paginationParams)) {
             if (data.access_type) {
                 const accessTypeClass = data.access_type === 'time_in' ? 'badge-info' : 'badge-warning';
                 const accessTypeIcon = data.access_type === 'time_in' ? 'sign-in-alt' : 'sign-out-alt';
-                const accessTypeText = data.access_type.replace('_', ' ').toUpperCase();
+                const accessTypeText = data.access_type === 'time_in' ? 'ENTRY' : 'EXIT';
                 accessTypeBadge = `<span class="badge ${accessTypeClass}"><i class="fas fa-${accessTypeIcon}"></i> ${accessTypeText}</span>`;
             }
             

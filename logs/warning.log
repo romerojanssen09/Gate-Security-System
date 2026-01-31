@@ -8,3 +8,16 @@
 [2026-01-31 05:23:38] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"open"}
 [2026-01-31 10:13:51] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"unauthorized"}
 [2026-01-31 10:15:15] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"open"}
+[2026-01-31 11:07:29] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"open"}
+[2026-01-31 11:08:16] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"open"}
+[2026-01-31 11:08:48] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"open"}
+[2026-01-31 11:45:01] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"open"}
+[2026-01-31 11:45:08] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"open"}
+[2026-01-31 11:45:26] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"unauthorized"}
+[2026-01-31 11:45:36] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"open"}
+[2026-01-31 11:45:42] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"open"}
+[2026-01-31 11:49:01] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"open"}
+[2026-01-31 11:49:15] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"open"}
+[2026-01-31 11:49:42] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"open"}
+[2026-01-31 11:49:48] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"open"}
+[2026-01-31 11:50:15] [warning] Arduino communication failed - Context: {"error":"Failed to connect to Python bridge","command":"open"}

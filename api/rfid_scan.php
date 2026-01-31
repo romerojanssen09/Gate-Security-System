@@ -169,7 +169,7 @@ try {
         if ($timeSinceLastScan < $scanTimeout) {
             // Not enough time has passed
             $remainingWait = (int)($scanTimeout - $timeSinceLastScan);
-            $timeoutReason = "Please wait " . $remainingWait . " seconds before scanning again";
+            $timeoutReason = "Gate cooldown active. Please wait " . $remainingWait . " second" . ($remainingWait !== 1 ? 's' : '');
             $isInTimeout = true;
         } else {
             // Enough time passed - allow scan and toggle status
