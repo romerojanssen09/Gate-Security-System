@@ -15,7 +15,7 @@ $page = $_GET['page'] ?? 'landing';
 $action = $_GET['action'] ?? '';
 
 // Check if user is logged in for protected pages
-$protectedPages = ['dashboard', 'rfid', 'reports', 'settings'];
+$protectedPages = ['dashboard', 'rfid', 'reports', 'settings', 'registrations'];
 if (in_array($page, $protectedPages) && !isset($_SESSION['admin_id'])) {
     header('Location: index.php?page=login');
     exit;
@@ -38,6 +38,9 @@ switch ($page) {
         break;
     case 'rfid':
         include 'views/rfid/manage.php';
+        break;
+    case 'registrations':
+        include 'views/registrations/pending.php';
         break;
     case 'reports':
         include 'views/reports/logs.php';

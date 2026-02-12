@@ -13,7 +13,6 @@ class PusherInstance
      * Get the pusher singleton instance.
      *
      * @return Pusher
-     * @throws PusherException
      */
     public static function get_pusher()
     {

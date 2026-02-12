@@ -44,6 +44,13 @@ $currentPage = $_GET['page'] ?? 'dashboard';
             </a>
         </li>
         <li class="sidebar-item">
+            <a href="index.php?page=registrations" 
+               class="<?php echo ($currentPage == 'registrations') ? 'active' : ''; ?>">
+                <i class="fas fa-user-clock"></i>
+                <span>Registration Requests</span>
+            </a>
+        </li>
+        <li class="sidebar-item">
             <a href="index.php?page=reports" 
                class="<?php echo ($currentPage == 'reports') ? 'active' : ''; ?>">
                 <i class="fas fa-chart-bar"></i>

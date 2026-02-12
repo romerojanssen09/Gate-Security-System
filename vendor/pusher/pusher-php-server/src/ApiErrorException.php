@@ -14,7 +14,7 @@ class ApiErrorException extends PusherException
      *
      * @return string
      */
-    public function __toString(): string
+    public function __toString()
     {
         return "(Status {$this->getCode()}) {$this->getMessage()}";
     }

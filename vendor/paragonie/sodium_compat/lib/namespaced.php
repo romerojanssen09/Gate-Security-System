@@ -1,7 +1,10 @@
 <?php
-declare(strict_types=1);
 
 require_once dirname(dirname(__FILE__)) . '/autoload.php';
+
+if (PHP_VERSION_ID < 50300) {
+    return;
+}
 
 /*
  * This file is just for convenience, to allow developers to reduce verbosity when

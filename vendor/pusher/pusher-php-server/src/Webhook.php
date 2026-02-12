@@ -4,10 +4,8 @@ namespace Pusher;
 
 class Webhook
 {
-    /** @var int $time_ms */
     private $time_ms;
-    /** @var array $events */
-    private $events;
+    private $events = array();
 
     public function __construct($time_ms, $events)
     {
@@ -15,12 +13,12 @@ class Webhook
         $this->events = $events;
     }
 
-    public function get_events(): array
+    public function get_events()
     {
         return $this->events;
     }
 
-    public function get_time_ms(): int
+    public function get_time_ms()
     {
         return $this->time_ms;
     }

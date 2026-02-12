@@ -1,63 +1,5 @@
 # Changelog
 
-## 7.2.6
-
-* Bump supported versions to include PHP8.2, 8.3
-
-## 7.2.5
-
-* Bump supported versions to include PHP8.2, 8.3.
-
-## 7.2.4
-
-* [Fixed] Timeout option is propagated to guzzle client
-
-## 7.2.3
-
-* [Fixed] Include socket_id in batch trigger if included.
-
-## 7.2.2
-
-* [FIXED] composer.phar file removed from package
-
-## 7.2.1
-
-* [FIXED] authenticateUser returns correct auth value
-
-## 7.2.0
-
-* [CHANGED] explicit support for 8.1
-* [CHANGED] Ignore pull_request_template.md on vendor
-* [ADDED] has_mixed_channels method to allow triggering a single event on multiple channels
-* [FIXED] path option can be used for proxied servers under subdirectory.
-* [CHANGED] base_path's leading slash is trimmed on every call to Guzzle.
-
-## 7.1.0-beta
-
-* [ADDED] `authenticateUser`, `authorizeChannel` and `authorizePresenceChannel`
-* [ADDED] `sendToUser` and `sendToUserAsync`
-* [ADDED] `terminateUserConnections` and `terminateUserConnectionsAsync`
-* [FIXED] `get_object_vars()` error on `/src/Pusher.php`
-* [DEPRECATED] `socketAuth` and `presenceAuth` in favour of `authorizeChannel` and `authorizePresenceChannel`
-* [DEPRECATED] Internal functions `make_request` and `make_batch_request` that were exposed as public
-
-## 7.0.2
-
-* [CHANGED] Add psr/log v2.0 and v3.0 compatibility
-
-## 7.0.1
-
-* [FIXED] Infinite recursion in `presence_auth`.
-
-## 7.0.0
-
-* [DEPRECATED] `get_channel_info`, `get_channels`, `socket_auth`, `presence_auth` in favour of camelCased versions
-* [DEPRECATED] `get_users_info` in favour of `getPresenceUsers`
-* [DEPRECATED] `ensure_valid_signature` in favour of `verifySignature`
-* [CHANGED] Restrict `$app_id` parameter of the `Pusher()` object to `string` (`int` was possible).
-* [ADDED] Return types.
-* [ADDED] Namespacing, PSR-12 formatting.
-
 ## 6.1.0
 
 * [ADDED] triggerAsync and triggerBatchAsync using the Guzzle async interface.
@@ -72,7 +14,7 @@
 * [CHANGED] internal HTTP client to Guzzle
 * [ADDED] optional client parameter to constructor
 * [CHANGED] useTLS is true by default
-* [REMOVED] `curl_options` from options
+* [REMOVED]  from options
 * [REMOVED] customer logger
 * [REMOVED] host, port and timeout constructor parameters
 * [REMOVED] support for PHP 7.1
@@ -259,6 +201,6 @@
 ## 2.0.0
 
 * [NEW] Versioning introduced at 2.0.0
-* [NEW] Added composer.json for submission to https://packagist.org/
+* [NEW] Added composer.json for submission to http://packagist.org/
 * [CHANGED] `get_channels()` now returns an object which has a `channels` property. This must be accessed to get the Array of channels in an application.
 * [CHANGED] `get_presence_channels()` now returns an object which has a `channels` property. This must be accessed to get the Array of channels in an application.

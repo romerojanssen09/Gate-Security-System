@@ -49,7 +49,78 @@ if (isset($_GET['msg'])) {
     <title>Holy Family High School - Gate Security System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="assets/css/landing.css" rel="stylesheet">
+    <link href="assets/css/landing.css?v=<?= time() ?>" rel="stylesheet">
+    <style>
+        /* Fallback visibility - ensure content shows even if JS fails */
+        .school-highlight,
+        .system-subtitle,
+        .hero-description,
+        .hero-buttons,
+        .gate-animation-container {
+            opacity: 1 !important;
+        }
+        
+        /* Allow GSAP to control these animations */
+        .feature-card,
+        .section-title,
+        .about-description,
+        .stat-item,
+        .showcase-item,
+        .footer-content {
+            opacity: 1;
+        }
+        
+        /* Force button styles */
+        .hero-buttons {
+            display: flex !important;
+            gap: 15px !important;
+            justify-content: center !important;
+            align-items: center !important;
+            flex-wrap: wrap !important;
+            margin-top: 30px !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
+        .btn-register-card {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 18px 45px !important;
+            text-decoration: none !important;
+            border-radius: 12px !important;
+            font-weight: 700 !important;
+            font-size: 1.1rem !important;
+            transition: all 0.3s ease !important;
+            cursor: pointer !important;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25) !important;
+            border: none !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            position: relative !important;
+            overflow: hidden !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            z-index: 10 !important;
+        }
+        
+        .btn-register-card {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+            color: white !important;
+        }
+        
+        .btn-register-card:hover {
+            color: white !important;
+            text-decoration: none !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.4) !important;
+        }
+        
+        .btn-register-card i {
+            margin-right: 10px !important;
+            font-size: 1.2rem !important;
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -87,6 +158,11 @@ if (isset($_GET['msg'])) {
                     <p class="hero-description">
                         Protecting our campus with cutting-edge RFID technology and real-time access control
                     </p>
+                    <div class="hero-buttons" style="margin-top: 30px;">
+                        <a href="register.php" class="btn-register-card">
+                            <i class="fas fa-id-card"></i> Register for RFID Card
+                        </a>
+                    </div>
                 </div>
                 
                 <!-- Gate Animation Container -->

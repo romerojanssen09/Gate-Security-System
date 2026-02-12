@@ -720,11 +720,7 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
                         'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)' : 
                         'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)';
                     
-                    // Reset after 3 seconds
-                    setTimeout(() => {
-                        showWaitingState();
-                        display.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-                    }, 3000);
+                    // NO automatic reset - display stays until next scan
                 } else {
                     // Show error from server
                     display.classList.remove('checking');
@@ -732,7 +728,7 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
                     text.textContent = 'Error: ' + (data.message || 'Operation failed');
                     display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
                     
-                    // Reset after 3 seconds
+                    // Reset after 3 seconds for errors
                     setTimeout(() => {
                         showWaitingState();
                         display.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
@@ -748,7 +744,7 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
                 text.textContent = 'Connection error. Please try again.';
                 display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
                 
-                // Reset after 3 seconds
+                // Reset after 3 seconds for errors
                 setTimeout(() => {
                     showWaitingState();
                     display.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
@@ -841,9 +837,12 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
             display.classList.remove('checking');
             icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
             text.textContent = 'Connection error. Please try again.';
+            display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
             
+            // Reset after 3 seconds for errors
             setTimeout(() => {
                 showWaitingState();
+                display.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
             }, 3000);
         }
         
@@ -980,7 +979,7 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
                             display.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
                         }, 5000);
                         
-                        return; // Exit early to prevent the normal 3-second reset
+                        return; // Exit early to prevent any reset
                     } else {
                         text.innerHTML = `<strong>GATE COOLDOWN</strong><br>${data.denial_reason}`;
                     }
@@ -1000,13 +999,15 @@ $todayLogsResult = mysqli_query($conn, $todayLogsQuery);
                 icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
                 text.textContent = 'Error: ' + data.message;
                 display.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
+                
+                // Reset after 3 seconds for errors
+                setTimeout(() => {
+                    showWaitingState();
+                    display.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                }, 3000);
             }
 
-            // Reset after 3 seconds
-            setTimeout(() => {
-                showWaitingState();
-                display.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-            }, 3000);
+            // NO automatic reset for success/denied - display stays until next scan
         }
 
         // Allow Enter key to trigger manual scan

@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 /**
  * Class ParagonIE_Sodium_Core_Base64UrlSafe
@@ -19,11 +18,9 @@ class ParagonIE_Sodium_Core_Base64_UrlSafe
      * @return string
      * @throws TypeError
      */
-    public static function encode(
-        #[SensitiveParameter]
-        string $src
-    ): string {
-        return self::doEncode($src);
+    public static function encode($src)
+    {
+        return self::doEncode($src, true);
     }
 
     /**
@@ -35,10 +32,8 @@ class ParagonIE_Sodium_Core_Base64_UrlSafe
      * @return string
      * @throws TypeError
      */
-    public static function encodeUnpadded(
-        #[SensitiveParameter]
-        string $src
-    ): string {
+    public static function encodeUnpadded($src)
+    {
         return self::doEncode($src, false);
     }
 
@@ -48,11 +43,8 @@ class ParagonIE_Sodium_Core_Base64_UrlSafe
      * @return string
      * @throws TypeError
      */
-    protected static function doEncode(
-        #[SensitiveParameter]
-        string $src,
-        bool $pad = true
-    ): string {
+    protected static function doEncode($src, $pad = true)
+    {
         $dest = '';
         $srcLen = ParagonIE_Sodium_Core_Util::strlen($src);
         // Main loop (no padding):
@@ -105,12 +97,10 @@ class ParagonIE_Sodium_Core_Base64_UrlSafe
      * @return string
      * @throws RangeException
      * @throws TypeError
+     * @psalm-suppress RedundantCondition
      */
-    public static function decode(
-        #[SensitiveParameter]
-        string $src,
-        bool $strictPadding = false
-    ): string {
+    public static function decode($src, $strictPadding = false)
+    {
         // Remove padding
         $srcLen = ParagonIE_Sodium_Core_Util::strlen($src);
         if ($srcLen === 0) {
@@ -182,8 +172,11 @@ class ParagonIE_Sodium_Core_Base64_UrlSafe
                     ((($c0 << 2) | ($c1 >> 4)) & 0xff)
                 );
                 $err |= ($c0 | $c1) >> 8;
+            } elseif ($i < $srcLen && $strictPadding) {
+                $err |= 1;
             }
         }
+        /** @var bool $check */
         $check = ($err === 0);
         if (!$check) {
             throw new RangeException(
@@ -192,6 +185,33 @@ class ParagonIE_Sodium_Core_Base64_UrlSafe
         }
         return $dest;
     }
+
+    /**
+     * @param string $encodedString
+     * @return string
+     */
+    public static function decodeNoPadding(
+        #[SensitiveParameter]
+        $encodedString
+    ) {
+        $srcLen = strlen($encodedString);
+        if ($srcLen === 0) {
+            return '';
+        }
+        if (($srcLen & 3) === 0) {
+            // If $strLen is not zero, and it is divisible by 4, then it's at least 4.
+            if ($encodedString[$srcLen - 1] === '=' || $encodedString[$srcLen - 2] === '=') {
+                throw new InvalidArgumentException(
+                    "decodeNoPadding() doesn't tolerate padding"
+                );
+            }
+        }
+        return self::decode(
+            $encodedString,
+            true
+        );
+    }
+
     // COPY ParagonIE_Sodium_Core_Base64_Common ENDING HERE
     /**
      * Uses bitwise operators instead of table-lookups to turn 6-bit integers
@@ -204,10 +224,8 @@ class ParagonIE_Sodium_Core_Base64_UrlSafe
      * @param int $src
      * @return int
      */
-    protected static function decode6Bits(
-        #[SensitiveParameter]
-        int $src
-    ): int {
+    protected static function decode6Bits($src)
+    {
         $ret = -1;
 
         // if ($src > 0x40 && $src < 0x5b) $ret += $src - 0x41 + 1; // -64
@@ -235,9 +253,8 @@ class ParagonIE_Sodium_Core_Base64_UrlSafe
      * @param int $src
      * @return string
      */
-    protected static function encode6Bits(
-        int $src
-    ): string {
+    protected static function encode6Bits($src)
+    {
         $diff = 0x41;
 
         // if ($src > 25) $diff += 0x61 - 0x41 - 26; // 6
